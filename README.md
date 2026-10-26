@@ -7,6 +7,14 @@
 **An AI gateway, with billing and access control built for resale**
 
 <p align="center">
+  <a href="./README.zh_CN.md">简体中文</a> |
+  <a href="./README.zh_TW.md">繁體中文</a> |
+  <strong>English</strong> |
+  <a href="./README.fr.md">Français</a> |
+  <a href="./README.ja.md">日本語</a>
+</p>
+
+<p align="center">
   <strong>Fork of <a href="https://github.com/QuantumNous/new-api">QuantumNous/new-api</a></strong> ·
   <a href="#what-this-fork-adds">What this fork adds</a> ·
   <a href="#quick-start">Quick start</a> ·

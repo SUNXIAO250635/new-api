@@ -4,7 +4,7 @@
 
 # New API
 
-**モデル、アプリケーション、Agent をつなぐ AI ゲートウェイ**
+**課金とアクセス制御を再販売のために設計した AI ゲートウェイ**
 
 <p align="center">
   <a href="./README.zh_CN.md">简体中文</a> |
@@ -15,144 +15,150 @@
 </p>
 
 <p align="center">
-  <a href="https://raw.githubusercontent.com/Calcium-Ion/new-api/main/LICENSE">
-    <img src="https://img.shields.io/github/license/Calcium-Ion/new-api?color=brightgreen" alt="license">
-  </a><!--
-  --><a href="https://github.com/Calcium-Ion/new-api/releases/latest">
-    <img src="https://img.shields.io/github/v/release/Calcium-Ion/new-api?color=brightgreen&include_prereleases" alt="release">
-  </a><!--
-  --><a href="https://hub.docker.com/r/CalciumIon/new-api">
-    <img src="https://img.shields.io/badge/docker-dockerHub-blue" alt="docker">
-  </a>
-  <a href="https://atomgit.com/QuantumNous/new-api" target="_blank">
-    <img alt="AtomGit G-Star" src="https://atomgit.com/QuantumNous/new-api/star/badge.svg"/>
-  </a>
-</p>
-
-<p align="center">
-  <a href="https://trendshift.io/repositories/20180" target="_blank">
-    <img src="https://trendshift.io/api/badge/repositories/20180" alt="QuantumNous%2Fnew-api | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/>
-  </a>
-  <br>
-  <a href="https://hellogithub.com/repository/QuantumNous/new-api" target="_blank">
-    <img src="https://api.hellogithub.com/v1/widgets/recommend.svg?rid=539ac4217e69431684ad4a0bab768811&claim_uid=tbFPfKIDHpc4TzR" alt="Featured｜HelloGitHub" style="width: 250px; height: 54px;" width="250" height="54" />
-  </a><!--
-  -->
-  <a href="https://atomgit.com/QuantumNous/new-api" target="_blank">
-    <img alt="AtomGit G-Star" src="https://atomgit.com/QuantumNous/new-api/star/new_badge.svg" width="250" height="55" />
-  </a>
-</p>
-
-<p align="center">
-  <a href="#capabilities">主な機能</a> •
-  <a href="#quick-start">クイックスタート</a> •
-  <a href="#deployment">デプロイ</a> •
-  <a href="#development">開発</a> •
-  <a href="#documentation">ドキュメント</a>
+  <strong><a href="https://github.com/QuantumNous/new-api">QuantumNous/new-api</a> のフォーク</strong> ·
+  <a href="#what-this-fork-adds">このフォークが追加したもの</a> ·
+  <a href="#quick-start">クイックスタート</a> ·
+  <a href="#upstream">上流プロジェクト</a>
 </p>
 
 </div>
 
 ---
 
-## 📝 プロジェクト説明
+## これは何か
 
-New API は、アプリケーション、Agent、チーム向けのセルフホスト型 AI ゲートウェイです。各社のモデルサービスを共通の入口に接続し、ルーティング、アクセス権、使用量、コストを一つの管理画面で扱えます。
+本プロジェクトは [new-api](https://github.com/QuantumNous/new-api) のフォークです。new-api は 40 以上の上流モデルサービスを OpenAI 互換 API の裏に集約する、セルフホスト型 AI ゲートウェイです。
 
-チーム内で許可済みのモデルを共有する、クライアントの再設定を減らしてプロバイダーを切り替える、複数モデルを扱うプライベートサービスを構築するといった用途に使えます。OpenAI、Anthropic、Google Gemini、Azure OpenAI、AWS Bedrock、Vertex AI、DeepSeek、Qwen などに対応しています。
+上流はモデルルーティング、アクセス制御、利用ログ、ウォレット課金をすでに備えています。**このフォークはそれらをすべて維持したうえで、実際にアクセスを販売するために必要なもの**——サブスクリプションプラン、福利残高、正式な引き換えコード機構、そしてそれらを支える課金の保証——を追加しています。
 
-> [!IMPORTANT]
-> - 本プロジェクトは、合法的に許可された AI API ゲートウェイ、組織レベルの認証、マルチモデル管理、利用量分析、コスト管理、プライベートデプロイのシナリオのみを対象としています。
-> - ユーザーは、上流の API キー、アカウント、モデルサービス、インターフェース権限を合法的に取得し、上流のサービス利用規約および適用される法律法規を遵守する必要があります。
-> - ユーザーは、利用方法が上流のサービス利用規約および適用される法律法規に準拠していることを確認してください。
-> - 生成 AI サービスを公衆に提供する場合、ユーザーは適用される規制要件を遵守し、管轄区域で求められる届出、ライセンス、コンテンツセキュリティ、本人確認、ログ保持、税務、上流認可などのすべての義務を履行してください。
-
-<!-- -->
-
-> [!WARNING]
-> 本プロジェクトを公衆向け生成 AI サービスまたは API 再販サービスとして運営する場合、ユーザーは届出、コンテンツセキュリティ、本人確認、ログ保持、税務、決済、上流認可などの必要なコンプライアンス義務を先に完了してください。
+以下に挙げるのは、このフォークが追加または変更した内容です。それ以外——プロトコル、チャネル、デプロイ、プラグイン機構、コンソールの基本操作——は上流と同一です。<a href="#upstream">上流プロジェクト</a>を参照してください。
 
 ---
 
-## 🤝 信頼できるパートナー
+<a id="what-this-fork-adds"></a>
 
-<p align="center">
-  <em>順不同</em>
-</p>
+## このフォークが追加したもの
 
-<p align="center">
-  <a href="https://www.cherry-ai.com/" target="_blank">
-    <img src="./docs/images/cherry-studio.png" alt="Cherry Studio" height="80" />
-  </a><!--
-  --><a href="https://github.com/iOfficeAI/AionUi/" target="_blank">
-    <img src="./docs/images/aionui.png" alt="Aion UI" height="80" />
-  </a><!--
-  --><a href="https://bda.pku.edu.cn/" target="_blank">
-    <img src="./docs/images/pku.png" alt="北京大学" height="80" />
-  </a><!--
-  --><a href="https://www.aliyun.com/" target="_blank">
-    <img src="./docs/images/aliyun.png" alt="Alibaba Cloud" height="80" />
-  </a><!--
-  --><a href="https://io.net/" target="_blank">
-    <img src="./docs/images/io-net.png" alt="IO.NET" height="80" />
-  </a>
-</p>
+### 1. サブスクリプションプラン
 
----
+上流にあるのはウォレットだけです。このフォークは独自のライフサイクルを持つ第二の資金源を追加します。
 
-## 🙏 特別な感謝
-
-<p align="center">
-  <a href="https://www.jetbrains.com/?from=new-api" target="_blank">
-    <img src="https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.png" alt="JetBrains Logo" width="120" />
-  </a>
-</p>
-
-<p align="center">
-  <strong>感謝 <a href="https://www.jetbrains.com/?from=new-api">JetBrains</a> が本プロジェクトに無料のオープンソース開発ライセンスを提供してくれたことに感謝します</strong>
-</p>
-
----
-
-<a id="capabilities"></a>
-
-## 主な機能
-
-| 分野 | できること |
+| 機能 | 内容 |
 | --- | --- |
-| モデル接続 | OpenAI Chat Completions、Responses、Anthropic Messages、Gemini に対応。上流が対応するストリーミング、ツール呼び出し、推論、マルチモーダル入力を利用可能 |
-| ルーティング | モデル名のマッピング、チャネルの優先度と重み、再試行、チャネルアフィニティ、複数キーの管理 |
-| 使用量とコスト | クォータ、サブスクリプション、使用ログ、キャッシュの課金、式による段階的な料金設定 |
-| アクセス制御 | ユーザー、グループ、詳細な権限、API キーの制限。OAuth/OIDC、パスキー、二要素認証、ログインセッション管理 |
-| 非同期タスク | JavaScript プラグインで画像・動画などのタスク API を拡張し、状態の確認と成果物の取得に対応 |
-| Web 管理画面 | チャネルとモデルの設定、使用・監査ログの確認、Playground でのモデル検証。英語、簡体字中国語、繁体字中国語、フランス語、日本語、ロシア語、ベトナム語に対応 |
+| プラン管理 | プランの作成・編集・無効化。価格、期間、総枠、昇格／降格グループ |
+| 枠のリセット | 使用済み枠を周期でリセット：なし / 日次 / 週次 / 月次 / カスタム秒数 |
+|  usage グループ | プランを特定のルーティンググループに制限。空欄は全グループ |
+| 同時実行制限 | サブスクリプションごとの同時リクエスト数を制限（0 は無制限） |
+| ウォレットへの溢流 | プランの枠を使い切ったあとウォレット残高にフォールバックできるか |
+| 購入上限 | 1 ユーザーが同一プランを購入できる回数の上限 |
+| 付与経路 | 残高支払い、Stripe、Creem、Epay、WaffoPancake、引き換えコード、管理者による直接付与 |
+| 管理操作 | 紐付け、無効化、削除、プランまたはユーザー単位でのリセット |
 
-### プロトコルとエンドポイント
+コンソール：**Subscriptions** — 管理者（プランの作成・編集、紐付け、無効化、リセット）とユーザー（自分のサブスクリプション、購入、課金戦略）が同じ画面を使います。
 
-| インターフェース | 主なエンドポイント |
+### 2. 福利残高
+
+ウォレットとは別に、管理者が付与する残高です。
+
+| 機能 | 内容 |
 | --- | --- |
-| OpenAI Chat / Responses | `POST /v1/chat/completions`、`POST /v1/responses` |
-| Anthropic Messages | `POST /v1/messages` |
-| Gemini | `POST /v1beta/models/{model}:generateContent`、`POST /v1beta/models/{model}:streamGenerateContent` |
-| Realtime / Responses WebSocket | `GET /v1/realtime`、`GET /v1/responses`（WebSocket アップグレード） |
-| 画像 / 音声 | `/v1/images/generations`、`/v1/images/edits`、`/v1/audio/speech`、`/v1/audio/transcriptions`、`/v1/audio/translations` |
-| 埋め込み / リランク | `POST /v1/embeddings`、`POST /v1/rerank` |
-| タスクプラグイン | `POST /v1/tasks/{pluginKey}`、`GET /v1/tasks/{taskId}`、各プラグインが宣言するルート |
+| 管理者による付与 | ユーザー編集ダイアログから、任意のユーザーの福利残高と有効期限を設定 |
+| 消費順序 | 福利残高がリクエストを賄えるときは、ウォレットやサブスクリプションより先に消費される |
+| 有効期限 | 絶対期限を任意に設定可能。期限切れの残高は決して課金されない |
+| バージョン囲い込み | 付与するたびにバージョンが増えます。予約・精算・返金はすべて、そのリクエストに資金を出したバージョンに固定されます。したがってリクエスト中に管理者が枠を変更しても、別のバッチへ額を付け替えることはできません |
 
-[RelayKit](./relaykit/README.md) は、上記 4 種類のテキストプロトコル間でリクエスト、レスポンス、ストリームを変換します。利用できる機能はチャネル、上流モデル、変換経路に依存し、固有のツールやフィールドを完全には変換できない場合があります。WebSocket も対応する上流とチャネル設定が必要です。
+コンソール：**Users → Set Welfare Balance**。
 
-この README は現在のソースコードを説明しています。デプロイするバージョンのリリースノートも確認してください。
+### 3. 引き換えコード
+
+上流の引き換えコードはウォレットにチャージするだけです。このフォークは它を本当の流通機構にします。
+
+| 機能 | 内容 |
+| --- | --- |
+| 3 種類の権益 | **Quota（枠）** ウォレットへチャージ、**Welfare（福利）** 福利残高を付与し独自の有効期限を設定可能、**Subscription（サブスクリプション）** プランを直接付与 |
+| 一括生成 | 1 回の操作で 1〜100 個のコードを生成し、同じバッチ ID を共有 |
+| バッチごとの受取規則 | 既定では 1 アカウントが同一バッチから受け取れるのは 1 回まで。バッチ単位で緩和可能 |
+| 一括削除 | 選択したコードを削除、または使用済み・期限切れ・無効化されたコードを一掃 |
+| エクスポート | 現在の絞り込み条件に一致するコードを TXT ファイルへストリーミング出力。1 行 1 コード |
+| 有効期限 | 権益自身の期限とは独立に、コード単位の期限を設定可能 |
+| 監査 | 作成・変更・削除・エクスポートはすべて監査ログに記録 |
+
+コンソール：**Redemption Codes**。ユーザーによる自己行使は **Wallet** にあります。
+
+### 4. 課金戦略と資金源のフォールバック
+
+上流は資金源を暗黙に選びます。このフォークは各ユーザーが選べるようにし、フォールバックを明示しました。
+
+| 戦略 | 動作 |
+| --- | --- |
+| Subscription First | サブスクリプションを試し、許可されていればウォレットへフォールバック |
+| Wallet First | ウォレットを試し、許可されていればサブスクリプションへフォールバック |
+| Subscription Only | ウォレットに手をつけない |
+| Wallet Only | サブスクリプションに手をつけない |
+
+福利残高は、リクエストを賄える限り、そのどちらよりも先に自動的に消費されます。
+
+コンソール：**Wallet** — 戦略セレクターと引き換え入口はここにあります。
+
+### 5. トークンの順序付きグループ
+
+上流のトークンはグループを 1 つだけ選べます。このフォークは它を順序付きグループリストに置き換えます。
+
+- 1 つのトークンが複数のグループを指定でき、順に試行されます。勝者は既存のチャネルアフィニティとリトライの機構が決めます。
+- グループの選択は、ユーザー自身のグループが実際に使える範囲に対して検証されます。
+- 順序付き選択は、サブスクリプションの usage グループやプランの制限の比較基準にもなります。
+
+コンソール：**Keys → Auto groups**。
+
+### 6. 登録とログの制御
+
+| オプション | 効果 |
+| --- | --- |
+| Restrict same-IP registration | 1 つの IP アドレスからは 1 アカウントのみ。一意なクレームテーブルとデータベース別のロックで実施します（PostgreSQL は助言ロック、MySQL はロック読み取り、SQLite は単一ライターによる直列化） |
+| Force IP logging | ユーザー単位の設定を上書きし、すべての利用ログとエラーログにクライアント IP を記録 |
+
+コンソール：**System Settings → Basic Authentication**。
+
+### 7. 課金の保証
+
+課金経路は、正常系だけでなく失敗に耐えるよう作り直されています。
+
+| 機構 | 防ぐもの |
+| --- | --- |
+| 永続的な返金記録 | リクエスト失敗時、残高に触れる前に返金記録を書き、ワーカーが成立までリトライします。リクエスト ID 単位・コンポーネント（資金・トークン）単位で二重に冪等 |
+| 制限付きリトライ | 永久に成功しない返金は 20 回試行後に `failed` として保管され、30 秒ごとに無限にリトライされることはありません |
+| 精算の突き合わせ | 資金が確定したあとにトークン調整が失敗した場合、目標値を永続化し、ワーカーが収束させます |
+| 事前消費の復元 | タスクの精算マーカー保存に失敗した場合、セッションは永続化された予約まで巻き戻ります。その後のポーリングが同じ差分を二重に課金することはありません |
+| バージョン囲い込みの福利 | 予約・精算・返金はすべて付与バージョンを運びます（上記参照） |
+
+### 8. セキュリティ強化
+
+上流に追加した修正。それぞれに回帰テストがあります。
+
+| 修正 | 内容 |
+| --- | --- |
+| 福利返金の囲い込み | 付与バージョンを記録していない福利タスクは、現在有効なバッチに返金されるのではなく拒否されます |
+| 無効化プランの到達不能 | 引き換えコードは無効化されたプランを付与できません。コード作成と引き換えの両方で `enabled` を確認します |
+| 同時実行リースの鮮度 | サブスクリプションのリースは、リース TTL 内の事前消費記録にだけ再武装されます。再生されたリクエスト ID が、もはや持っていない同時実行枠を占有することはできません |
+| 通知 URL の検証 | Webhook・Bark・Gotify の URL は、配送時だけでなく保存時に SSRF ポリシーで検証されます |
+| 依存関係の CVE | `x/net`、`x/image`、`x/text` の 9 件の脆弱性を解消。`govulncheck` はゼロを報告 |
+
+### 9. コンソールの変更点
+
+- **Users** — 福利残高フィールドと `Set Welfare Balance` 操作
+- **Keys** — 自動グループの順序エディター
+- **Wallet** — サブスクリプションプランカード、課金戦略セレクター、引き換え入口
+- **Subscriptions** — プラン一覧、購入、自己管理
+- **Redemption Codes** — 一括操作とエクスポートを含む完全な管理画面
+- **System Settings → Basic Authentication** — 上記 2 つの IP 関連スイッチ
+
+---
 
 <a id="quick-start"></a>
 
 ## クイックスタート
 
-### Docker でローカル実行
-
-SQLite を使う単一インスタンスを、ローカルホスト限定で起動します。
-
 ```bash
-mkdir -p data
 docker run --name new-api -d --restart unless-stopped \
   -p 127.0.0.1:3000:3000 \
   -e TZ=Asia/Shanghai \
@@ -160,181 +166,50 @@ docker run --name new-api -d --restart unless-stopped \
   calciumion/new-api:latest
 ```
 
-[http://localhost:3000](http://localhost:3000) を開き、初期設定ウィザードで管理者アカウントを作成します。SQLite データベースはマウントした `data` ディレクトリに保存され、コンテナを置き換えても残ります。
+<http://localhost:3000> を開き、セットアップウィザードを完了させます。
 
-### 最初のリクエスト
+次に、順番に：
 
-1. 上流の API キー、利用するモデル、グループを設定してチャネルを追加し、チャネルテストを実行します。
-2. モデルの料金を設定し、ユーザーに利用可能なクォータまたは有効なサブスクリプションがあることを確認します。
-3. 管理画面で、同じグループとモデルにアクセスできる API キーを作成します。
-4. OpenAI 互換クライアントでは Base URL を `http://localhost:3000/v1` に設定し、**New API が発行したキー**を使います。
+1. **Subscriptions** — プランを作成します。ウォレットのみを使うなら飛ばして構いません
+2. **Channels** — 上流キーを追加し、チャネルをテストします
+3. **Redemption Codes** — 希望する権益タイプのコードを生成します
+4. コードをユーザーに渡し、**Wallet** で引き換えてもらいます
 
-シェルの `NEW_API_KEY` にそのキーを設定し、アクセス可能なモデルを確認します。
-
-```bash
-curl --fail-with-body http://localhost:3000/v1/models \
-  -H "Authorization: Bearer ${NEW_API_KEY}"
-```
-
-次に Responses を呼び出します。`your-enabled-model` は、このインターフェースに対応する有効なモデル名に置き換えてください。
-
-```bash
-curl --fail-with-body http://localhost:3000/v1/responses \
-  -H "Authorization: Bearer ${NEW_API_KEY}" \
-  -H "Content-Type: application/json" \
-  -d '{"model":"your-enabled-model","input":"Hello!"}'
-```
-
-<a id="deployment"></a>
-
-## デプロイと運用
-
-### Docker Compose
-
-リポジトリの [Compose 設定](./docker-compose.yml) は、既定で **New API + PostgreSQL + Redis** を起動します。MySQL と独立した ClickHouse ログデータベースの設定例も含まれます。
-
-```bash
-git clone https://github.com/QuantumNous/new-api.git
-cd new-api
-```
-
-起動前に `docker-compose.yml` を編集し、データベースと Redis のサービスおよび接続文字列にあるサンプルパスワードを変更します。永続的に使うランダムな `SESSION_SECRET` も設定してください（`openssl rand -hex 32` で生成可能）。HTTPS の管理画面には `SESSION_COOKIE_SECURE=true` を設定し、公開 HTTPS オリジンを `SESSION_COOKIE_TRUSTED_URL` に正確に指定します。
-
-```bash
-docker compose up -d
-docker compose logs -f new-api
-```
-
-### ストレージと設定
-
-| コンポーネント | 選択肢 |
-| --- | --- |
-| メインデータベース | SQLite、MySQL ≥ 5.7.8、PostgreSQL ≥ 9.6 |
-| 独立したログデータベース | `LOG_SQL_DSN` で設定。ClickHouse にも対応 |
-| キャッシュ | 任意の Redis とメモリキャッシュ。ノード間でレート制限を共有する場合は Redis を共有 |
-| コンテナのプラットフォーム | Linux amd64 / arm64 |
-
-| 環境変数 | 用途 |
-| --- | --- |
-| `SQL_DSN` | メインデータベースへの接続。未設定なら SQLite |
-| `LOG_SQL_DSN` | 任意の独立ログデータベースへの接続 |
-| `REDIS_CONN_STRING` | Redis 接続文字列 |
-| `SESSION_SECRET` | 永続的な認証用シークレット。全ノードで同じ値を使用 |
-| `CRYPTO_SECRET` | 既定は `SESSION_SECRET`。Redis を共有するノードは同じ実効値を使用 |
-| `SESSION_COOKIE_SECURE` | HTTPS の管理画面では `true`。Secure な更新用 Cookie と、更新・ログアウト時の厳格なオリジン検証を有効化 |
-| `SESSION_COOKIE_TRUSTED_URL` | Secure モードでは必須。パスやワイルドカードを含まない正確な HTTPS オリジンをカンマ区切りで指定。ローカル HTTP では未設定にする |
-| `TRUSTED_PROXIES` | 信頼するリバースプロキシの IP/CIDR、または `none`。実際のネットワークに合わせて明示的に設定 |
-
-詳細は[環境変数の例](./.env.example)、[環境変数リファレンス](https://docs.newapi.ai/ja/docs/installation/config-maintenance/environment-variables)、[認証とセッションの説明](./docs/authentication.md)を参照してください。コンテナの変数は Compose の `environment` または `env_file` で渡します。`.env.example` のコピーだけではコンテナに反映されません。
-
-本番環境では HTTPS を使い、リバースプロキシでストリーミングと WebSocket アップグレードを有効にします。データベースとマウントデータを永続化し、バックアップしてください。複数ノードはメインデータベースと認証シークレットを共有します。独立した Redis やメモリ内のレート制限はノードごとに計数します。構成別のセッション伝播については認証の説明を参照してください。
-
-[リリース一覧](https://github.com/QuantumNous/new-api/releases)からイメージのバージョンを固定し、更新内容を読んでバックアップしてからアップグレードしてください。`latest` は公開ビルドに応じて変わります。既存環境の移行と互換性は、利用中のバージョンに応じて確認してください。
-
-<a id="development"></a>
-
-## 開発と拡張
-
-バックエンドは Go と Gin、管理画面は React 19、TypeScript、Rsbuild、TanStack、Tailwind CSS 4 を使用します。フロントエンドの依存関係とスクリプトには Bun を使います。Go 言語の基準バージョンは [go.mod](./go.mod)、コンテナのビルドツールチェーンは [Dockerfile](./Dockerfile) を参照してください。
-
-バックエンドは `web/dist` を埋め込むため、先にフロントエンドをビルドします。
-
-```bash
-# リポジトリのルート
-cd web
-bun install --frozen-lockfile
-bun run build
-cd ..
-go run .
-```
-
-別のターミナルでフロントエンド開発サーバーを起動します。
-
-```bash
-cd web
-bun run dev -- --port 5173
-```
-
-[http://localhost:5173](http://localhost:5173) を開きます。API リクエストはポート 3000 のバックエンドに転送されます。開発用バックエンドをコンテナで動かす場合は [docker-compose.dev.yml](./docker-compose.dev.yml) と [makefile](./makefile) の `make dev` を参照してください。
-
-| 場所 | 役割 |
-| --- | --- |
-| `router/`、`middleware/`、`controller/` | HTTP ルート、アクセス検証、API ハンドラー |
-| `relay/` | 上流アダプターとリクエストのルーティング |
-| `service/`、`model/` | ビジネスロジックと永続化 |
-| [relaykit/](./relaykit/README.md) | プロトコル DTO と変換を提供する、独立してビルド可能な Go モジュール |
-| [plugins/tasks/](./plugins/tasks/) | JavaScript タスクプラグイン。作成方法とホストの境界は [Task Plugin API v1](./docs/plugin-api/v1.md) を参照 |
-| `web/` | Web 管理画面。[フロントエンドの規約](./web/AGENTS.md)を参照 |
-| [electron/](./electron/README.md) | デスクトップアプリのラッパーとパッケージング |
-
-貢献前に [AGENTS.md](./AGENTS.md) を確認してください。変更に応じて、Go モジュールは `make test`、フロントエンドは `web/` で `bun run typecheck`、`bun run lint`、`bun run test`、`bun run build` を実行します。RelayKit を変更した場合は、`relaykit/` で `GOWORK=off go build ./...` も実行してください。
-
-<a id="documentation"></a>
-
-## ドキュメントとコミュニティ
-
-| リソース | リンク |
-| --- | --- |
-| 公式ドキュメント | [ガイド](https://docs.newapi.ai/ja/docs) · [インストール](https://docs.newapi.ai/ja/docs/installation) · [API リファレンス](https://docs.newapi.ai/ja/docs/api) |
-| プロジェクトの解説 | [DeepWiki](https://deepwiki.com/QuantumNous/new-api) |
-| 質問と交流 | [FAQ](https://docs.newapi.ai/ja/docs/support/faq) · [コミュニティ](https://docs.newapi.ai/ja/docs/support/community-interaction) |
-| 不具合と機能提案 | [GitHub Issues](https://github.com/QuantumNous/new-api/issues) |
-| 脆弱性 | [セキュリティポリシー](./.github/SECURITY.md)に従って非公開で報告 |
-
-不具合の報告には、バージョン、デプロイ方法、再現手順、機密情報を除いたログを添えてください。ドキュメント、翻訳、プロバイダー連携、対象を絞った回帰テストへの貢献も歓迎します。
+設定・保存・マルチノードデプロイ・環境変数の完全なリファレンスは上流と同一です。[環境変数の例](./.env.example) と[上流ドキュメント](https://docs.newapi.ai/en/docs) を参照してください。
 
 ---
 
-## 🔗 関連プロジェクト
+<a id="upstream"></a>
 
-### 上流プロジェクト
+## 上流プロジェクト
 
-| プロジェクト | 説明 |
-|------|------|
-| [One API](https://github.com/songquanpeng/one-api) | オリジナルプロジェクトベース |
-| [Midjourney-Proxy](https://github.com/novicezk/midjourney-proxy) | Midjourneyインターフェースサポート |
+このフォークは [QuantumNous/new-api](https://github.com/QuantumNous/new-api) を追跡し、そのリリースをマージします。
 
-### 補助ツール
+| | |
+| --- | --- |
+| 上流プロジェクト | <https://github.com/QuantumNous/new-api> |
+| 由来 | [One API](https://github.com/songquanpeng/one-api)（MIT） |
+| ドキュメント | <https://docs.newapi.ai/en/docs> |
+| プロトコル・チャネル・プラグイン | 上流 README と [RelayKit](./relaykit/README.md) を参照 |
 
-| プロジェクト | 説明 |
-|------|------|
-| [new-api-key-tool](https://github.com/Calcium-Ion/new-api-key-tool) | キー使用量クォータ照会ツール |
-| [new-api-horizon](https://github.com/Calcium-Ion/new-api-horizon) | New API高性能最適化版 |
+**上流から無変更で受け継いでいるもの**：モデルルーティングとチャネル管理、4 つのテキストプロトコルとその変換、画像／音声／リアルタイムのエンドポイント、JavaScript タスクプラグイン機構、Passkey / TOTP / OAuth / OIDC、監査ログ、i18n、コンソールの外枠、デプロイの仕組み。
 
----
+### 上流と同期し続ける
 
-## 📜 ライセンス
+```bash
+git remote add upstream https://github.com/QuantumNous/new-api.git
+git fetch upstream
+git merge upstream/main
+```
 
-このプロジェクトは [GNU Affero General Public License v3.0 (AGPLv3)](./LICENSE) の下でライセンスされています。
-
-AGPLv3 第 7 条に基づく[追加条項](./NOTICE)が適用されます。変更版では、適切な法的表示と、画面上の目立つ概要・法的情報・フッター・著作者表示の箇所に `Frontend design and development by New API contributors.` を残し、元のプロジェクト <https://github.com/QuantumNous/new-api> への可視リンクを保持する必要があります。
-
-本プロジェクトは、[One API](https://github.com/songquanpeng/one-api)（MITライセンス）をベースに開発されたオープンソースプロジェクトです。
-
-お客様の組織のポリシーがAGPLv3ライセンスのソフトウェアの使用を許可していない場合、またはAGPLv3のオープンソース義務を回避したい場合は、こちらまでお問い合わせください：[support@quantumnous.com](mailto:support@quantumnous.com)
-
-著作者と依存関係の表示については [NOTICE](./NOTICE) と[サードパーティライセンス](./THIRD-PARTY-LICENSES.md)を参照してください。
+フォークの変更は課金・引き換えコード・サブスクリプション・福利に関するコードに集中しています。`service/billing*.go`、`model/redemption.go`、`model/subscription.go`、`model/welfare_quota.go`、および対応するフロントエンド機能での衝突を想定してください。
 
 ---
 
-## 🌟 スター履歴
+## ライセンス
 
-<div align="center">
+GNU Affero 一般公衆ライセンス v3.0。[LICENSE](./LICENSE)、[NOTICE](./NOTICE)、[THIRD-PARTY-LICENSES.md](./THIRD-PARTY-LICENSES.md) を参照してください。
 
-[![スター履歴チャート](https://api.star-history.com/svg?repos=Calcium-Ion/new-api&type=Date)](https://star-history.com/#Calcium-Ion/new-api&Date)
+本プロジェクトは [One API](https://github.com/songquanpeng/one-api)（MIT）を [new-api](https://github.com/QuantumNous/new-api) 経由で開発したものです。
 
-</div>
-
----
-
-<div align="center">
-
-### 💖 New APIをご利用いただきありがとうございます
-
-このプロジェクトがあなたのお役に立てたなら、ぜひ ⭐️ スターをください！
-
-**[公式ドキュメント](https://docs.newapi.ai/ja/docs)** • **[問題フィードバック](https://github.com/Calcium-Ion/new-api/issues)** • **[最新リリース](https://github.com/Calcium-Ion/new-api/releases)**
-
-<sub>❤️ で構築された QuantumNous</sub>
-
-</div>
+合法的に利用してください。上流キーとモデルへのアクセスは正式な手段で取得し、上流のサービス規約およびお住まいの法域の法令を遵守してください。多くの法域では、公開 AI サービスの運営には届出、コンテンツ安全性、本人確認の義務が伴います。

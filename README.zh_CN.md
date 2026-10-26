@@ -4,170 +4,161 @@
 
 # New API
 
-**连接模型、应用与 Agent 的 AI 网关**
+**一个 AI 网关，计费与权限控制为转售而生**
 
 <p align="center">
-  <strong>简体中文</strong> |
   <a href="./README.zh_TW.md">繁體中文</a> |
+  <strong>简体中文</strong> |
   <a href="./README.md">English</a> |
   <a href="./README.fr.md">Français</a> |
   <a href="./README.ja.md">日本語</a>
 </p>
 
 <p align="center">
-  <a href="https://raw.githubusercontent.com/Calcium-Ion/new-api/main/LICENSE">
-    <img src="https://img.shields.io/github/license/Calcium-Ion/new-api?color=brightgreen" alt="license">
-  </a><!--
-  --><a href="https://github.com/Calcium-Ion/new-api/releases/latest">
-    <img src="https://img.shields.io/github/v/release/Calcium-Ion/new-api?color=brightgreen&include_prereleases" alt="release">
-  </a><!--
-  --><a href="https://hub.docker.com/r/CalciumIon/new-api">
-    <img src="https://img.shields.io/badge/docker-dockerHub-blue" alt="docker">
-  </a>
-  <a href="https://atomgit.com/QuantumNous/new-api" target="_blank">
-    <img alt="AtomGit G-Star" src="https://atomgit.com/QuantumNous/new-api/star/badge.svg"/>
-  </a>
-</p>
-
-<p align="center">
-  <a href="https://trendshift.io/repositories/20180" target="_blank">
-    <img src="https://trendshift.io/api/badge/repositories/20180" alt="QuantumNous%2Fnew-api | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/>
-  </a>
-  <br>
-  <a href="https://hellogithub.com/repository/QuantumNous/new-api" target="_blank">
-    <img src="https://api.hellogithub.com/v1/widgets/recommend.svg?rid=539ac4217e69431684ad4a0bab768811&claim_uid=tbFPfKIDHpc4TzR" alt="Featured｜HelloGitHub" style="width: 250px; height: 54px;" width="250" height="54" />
-  </a><!--
-  -->
-  <a href="https://atomgit.com/QuantumNous/new-api" target="_blank">
-    <img alt="AtomGit G-Star" src="https://atomgit.com/QuantumNous/new-api/star/new_badge.svg" width="250" height="55" />
-  </a>
-</p>
-
-<p align="center">
-  <a href="#screenshots">项目截图</a> •
-  <a href="#capabilities">核心能力</a> •
-  <a href="#quick-start">快速开始</a> •
-  <a href="#deployment">部署运维</a> •
-  <a href="#development">开发扩展</a> •
-  <a href="#documentation">文档社区</a>
+  <strong><a href="https://github.com/QuantumNous/new-api">QuantumNous/new-api</a> 的分支</strong> ·
+  <a href="#what-this-fork-adds">本分支新增了什么</a> ·
+  <a href="#quick-start">快速开始</a> ·
+  <a href="#upstream">上游项目</a>
 </p>
 
 </div>
 
 ---
 
-## 📝 项目说明
+## 这是什么
 
-New API 是面向应用、Agent 和团队的自托管 AI 网关。将不同厂商的模型服务接入统一入口，在同一套控制台中管理渠道、访问权限、用量与成本。
+本项目是 [new-api](https://github.com/QuantumNous/new-api) 的分支。new-api 是一个自托管的 AI 网关，把 40 多个上游模型服务聚合到一套 OpenAI 兼容接口之后。
 
-你可以用它为团队分配已授权的模型资源，在切换上游时减少客户端改动，或搭建自己的多模型服务。支持接入 OpenAI、Anthropic、Google Gemini、Azure OpenAI、AWS Bedrock、Vertex AI、DeepSeek、通义千问及其他兼容服务。
+上游已经提供了模型路由、访问控制、用量日志和钱包计费。**本分支保留这些能力，并补上了真正对外售卖所需要的东西**：订阅套餐、福利余额、一套完整的兑换码体系，以及与之配套的计费保障。
 
-> [!IMPORTANT]
-> - 本项目仅面向合法授权的 AI API 网关、组织内部鉴权、多模型管理、用量统计、成本核算和私有化部署场景。
-> - 使用者必须合法取得上游 API Key、账号、模型服务或接口权限，并遵守上游服务条款及适用法律法规。
-> - 使用者应确保其使用方式符合上游服务条款及适用法律法规。
-> - 面向公众提供生成式人工智能服务时，使用者应遵守[《生成式人工智能服务管理暂行办法》](http://www.cac.gov.cn/2023-07/13/c_1690898327029107.htm)等监管要求，自行完成所在司法辖区要求的备案、许可、内容安全、实名、日志留存、税务和上游授权等合规义务。
-
-<!-- -->
-
-> [!WARNING]
-> 将本项目作为面向公众的生成式 AI 服务或 API 转售服务运营时，使用者应先完成备案、内容安全、实名、日志留存、税务、支付和上游授权等合规义务。
+下面列出的都是本分支新增或修改的内容。未提及的部分——协议、渠道、部署、插件系统、控制台基础操作——与上游完全一致，见<a href="#upstream">上游项目</a>。
 
 ---
 
-<a id="screenshots"></a>
+<a id="what-this-fork-adds"></a>
 
-## 项目截图
+## 本分支新增的能力
 
-以下账号、渠道、插件安装状态、用量、价格和费用均为模拟数据，插件市场展示官方目录。点击图片可查看原图。
+### 1. 订阅套餐
 
-| 数据看板 | 插件市场 |
+上游只有钱包，本分支增加了第二种资金来源，并有完整的生命周期。
+
+| 能力 | 说明 |
 | --- | --- |
-| [![数据看板：模拟请求量、费用和性能指标](assets/screenshots/dashboard.zh-CN.jpg)](assets/screenshots/dashboard.zh-CN.jpg) | [![插件市场：官方插件目录与模拟安装状态](assets/screenshots/plugin-marketplace.zh-CN.jpg)](assets/screenshots/plugin-marketplace.zh-CN.jpg) |
-| **模型广场** | **使用日志** |
-| [![模型广场：模拟模型价格与可用状态](assets/screenshots/models.zh-CN.jpg)](assets/screenshots/models.zh-CN.jpg) | [![使用日志：模拟 Token 用量、费用和响应耗时](assets/screenshots/usage-logs.zh-CN.jpg)](assets/screenshots/usage-logs.zh-CN.jpg) |
+| 套餐管理 | 创建、编辑、停用套餐；价格、时长、总额度、升级/降级分组 |
+| 配额重置 | 按周期重置已用额度：从不 / 每日 / 每周 / 每月 / 自定义秒数 |
+| 用量分组 | 限制套餐只能用于指定路由分组；留空表示不限制 |
+| 并发限制 | 限制单个订阅的同时请求数（0 为不限制） |
+| 钱包溢出 | 套餐额度用尽后是否允许回落到钱包余额 |
+| 购买上限 | 每个用户可购买同一套餐的次数上限 |
+| 发放路径 | 余额支付、Stripe、Creem、易支付、WaffoPancake、兑换码、管理员直接发放 |
+| 管理操作 | 绑定、作废、删除、按套餐或按用户重置 |
 
----
+控制台：**Subscriptions（订阅管理）**——管理员和用户共用同一个页面，管理员在此创建/编辑套餐、绑定、作废、重置，用户在此查看自己的订阅、购买、设置扣费策略。
 
-## 🤝 我们信任的合作伙伴
+### 2. 福利余额
 
-<p align="center">
-  <em>排名不分先后</em>
-</p>
+一种独立于钱包、由管理员发放的余额。
 
-<p align="center">
-  <a href="https://www.cherry-ai.com/" target="_blank">
-    <img src="./docs/images/cherry-studio.png" alt="Cherry Studio" height="80" />
-  </a><!--
-  --><a href="https://github.com/iOfficeAI/AionUi/" target="_blank">
-    <img src="./docs/images/aionui.png" alt="Aion UI" height="80" />
-  </a><!--
-  --><a href="https://bda.pku.edu.cn/" target="_blank">
-    <img src="./docs/images/pku.png" alt="北京大学" height="80" />
-  </a><!--
-  --><a href="https://www.aliyun.com/" target="_blank">
-    <img src="./docs/images/aliyun.png" alt="阿里云" height="80" />
-  </a><!--
-  --><a href="https://io.net/" target="_blank">
-    <img src="./docs/images/io-net.png" alt="IO.NET" height="80" />
-  </a>
-</p>
-
----
-
-## 🙏 特别鸣谢
-
-<p align="center">
-  <a href="https://www.jetbrains.com/?from=new-api" target="_blank">
-    <img src="https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.png" alt="JetBrains Logo" width="120" />
-  </a>
-</p>
-
-<p align="center">
-  <strong>感谢 <a href="https://www.jetbrains.com/?from=new-api">JetBrains</a> 为本项目提供免费的开源开发许可证</strong>
-</p>
-
----
-
-<a id="capabilities"></a>
-
-## 核心能力
-
-| 方向 | 可以做什么 |
+| 能力 | 说明 |
 | --- | --- |
-| 模型接入 | 支持 OpenAI Chat Completions、Responses、Anthropic Messages 和 Gemini 协议，以及上游支持的流式输出、工具调用、推理与多模态输入 |
-| 渠道调度 | 配置模型映射、渠道优先级与权重、失败重试、渠道亲和性和多密钥管理 |
-| 用量与成本 | 管理额度、订阅套餐、用量日志、缓存计费，以及基于表达式的阶梯定价 |
-| 访问控制 | 管理用户、分组、细粒度权限和 API Key 限制；支持 OAuth/OIDC、通行密钥、两步验证与登录会话管理 |
-| 异步任务 | 通过 JavaScript 插件扩展图片、视频等任务 API，统一查询任务状态和获取产物 |
-| Web 控制台 | 配置渠道与模型、查看用量和审计日志、在 Playground 中调试模型；支持简体中文、繁体中文、英语、法语、日语、俄语和越南语 |
+| 管理员发放 | 在用户编辑弹窗中设置任意用户的福利余额及其过期时间 |
+| 消耗顺序 | 福利余额足以覆盖请求时，优先于钱包和订阅消耗 |
+| 过期机制 | 可设置绝对过期时间，过期余额绝不会被扣 |
+| 版本围栏 | 每次发放都会递增版本号。预扣、结算、退款全部绑定到为该请求出资的那个版本，因此请求进行中管理员修改配额不会把额度记到另一个批次上 |
 
-### 协议与接口
+控制台：**Users（用户管理）→ Set Welfare Balance（设置福利余额）**。
 
-| 接口类型 | 常用入口 |
+### 3. 兑换码
+
+上游的兑换码只能给钱包充值。本分支把它做成了真正的分发机制。
+
+| 能力 | 说明 |
 | --- | --- |
-| OpenAI Chat / Responses | `POST /v1/chat/completions`、`POST /v1/responses` |
-| Anthropic Messages | `POST /v1/messages` |
-| Gemini | `POST /v1beta/models/{model}:generateContent`、`POST /v1beta/models/{model}:streamGenerateContent` |
-| Realtime / Responses WebSocket | `GET /v1/realtime`、`GET /v1/responses`（WebSocket 升级） |
-| 图片 / 音频 | `/v1/images/generations`、`/v1/images/edits`、`/v1/audio/speech`、`/v1/audio/transcriptions`、`/v1/audio/translations` |
-| 向量 / 重排 | `POST /v1/embeddings`、`POST /v1/rerank` |
-| 任务插件 | `POST /v1/tasks/{pluginKey}`、`GET /v1/tasks/{taskId}`，以及各插件声明的协议路由 |
+| 三种权益类型 | **Quota（额度）** 充值到钱包、**Welfare（福利）** 发放福利余额并可单独设置过期时间、**Subscription（订阅）** 直接授予套餐 |
+| 批量生成 | 一次生成 1–100 个兑换码，共用同一个批次 ID |
+| 批次领取策略 | 默认每个账号在同一批次只能领取一次，可按批次放开 |
+| 批量删除 | 删除选中的兑换码，或一键清理已用/已过期/已停用的 |
+| 导出 | 按当前筛选条件流式导出为 TXT 文件，每行一个兑换码 |
+| 过期时间 | 可设置独立的兑换码过期时间，与权益自身的过期时间无关 |
+| 审计 | 创建、修改、删除、导出全部记入审计日志 |
 
-[RelayKit](./relaykit/README.md) 提供上述四种文本协议之间的请求、响应和流式转换。实际可用能力取决于渠道、上游模型和转换路径；协议特有的工具与字段可能无法完整映射。WebSocket 同样需要上游与渠道配置支持。
+控制台：**Redemption Codes（兑换码管理）**。用户自助兑换在 **Wallet（钱包）**。
 
-本 README 描述当前源码的能力，部署时请同时查看所选版本的发布说明。
+### 4. 扣费策略与资金来源回落
+
+上游隐式选择资金来源，本分支让每个用户自己选，并把回落规则显式化。
+
+| 策略 | 行为 |
+| --- | --- |
+| Subscription First（订阅优先） | 先试订阅，策略允许时回落到钱包 |
+| Wallet First（钱包优先） | 先试钱包，策略允许时回落到订阅 |
+| Subscription Only（仅订阅） | 不动钱包 |
+| Wallet Only（仅钱包） | 不动订阅 |
+
+福利余额在两个之前自动消耗——只要它足以覆盖请求。
+
+控制台：**Wallet（钱包）**——策略选择器和兑换入口都在这里。
+
+### 5. 令牌有序分组
+
+上游的令牌只能选一个分组，本分支换成了有序分组列表。
+
+- 一个令牌可以指定多个分组，按顺序尝试，由原有的渠道亲和与重试机制决定最终落在哪个。
+- 分组选择会对照用户自身分组实际可用的范围做校验。
+- 有序分组同时也是订阅用量分组和套餐限制的比对基准。
+
+控制台：**Keys（令牌管理）→ Auto groups（自动分组）**。
+
+### 6. 注册与日志管控
+
+| 选项 | 效果 |
+| --- | --- |
+| Restrict same-IP registration（同 IP 限注册） | 一个 IP 地址只能注册一个账号。通过唯一声明表加按数据库的锁实现：PostgreSQL 用咨询锁，MySQL 用锁读，SQLite 靠单写串行 |
+| Force IP logging（强制 IP 日志） | 覆盖用户个人偏好，所有用量日志和错误日志都记录客户端 IP |
+
+控制台：**System Settings → Basic Authentication（基础认证）**。
+
+### 7. 计费保障
+
+计费链路按"出错也能对账"重做过，不只是跑通 happy path。
+
+| 机制 | 防止什么 |
+| --- | --- |
+| 持久化退款记录 | 请求失败时先落一条退款记录再动余额，由后台worker重试到落地。按请求 ID 和按组件（资金、令牌）双重幂等 |
+| 有限重试 | 永远不可能成功的退款在 20 次尝试后置为 `failed` 停放，不会每 30 秒无限重试 |
+| 结算对账 | 令牌调整在资金已提交后失败时，把目标值持久化，由 worker 收敛到位 |
+| 预扣回滚 | 任务结算标记落库失败时，会话回滚到持久化的预扣水位，之后的轮询不会把同一笔差额扣两次 |
+| 福利版本围栏 | 预扣、结算、退款都携带发放版本号（见上） |
+
+### 8. 安全加固
+
+在上游基础上的修复，每一项都有回归测试：
+
+| 修复 | 说明 |
+| --- | --- |
+| 福利退款围栏 | 没有记录发放版本的福利任务直接拒绝退款，而不是把额度退回当前生效的批次 |
+| 停用套餐不可达 | 兑换码不能授予已停用的套餐，创建和兑换两处都检查 `enabled` |
+| 并发租约新鲜度 | 订阅租约只为租约 TTL 内的预扣记录重新武装，重放的请求 ID 无法占用它已不再持有的并发槽 |
+| 通知 URL 校验 | Webhook、Bark、Gotify 的地址在保存时就按 SSRF 策略校验，而不是只等到投递时兜底 |
+| 依赖 CVE | 清除 `x/net`、`x/image`、`x/text` 共 9 个漏洞，`govulncheck` 报告为零 |
+
+### 9. 控制台变化
+
+- **Users（用户管理）** — 福利余额字段和 `Set Welfare Balance` 操作
+- **Keys（令牌管理）** — 自动分组排序编辑器
+- **Wallet（钱包）** — 订阅套餐卡片、扣费策略选择器、兑换入口
+- **Subscriptions（订阅管理）** — 套餐列表、购买、自助管理
+- **Redemption Codes（兑换码管理）** — 完整的管理界面，含批量操作和导出
+- **System Settings → Basic Authentication（基础认证）** — 上述两个 IP 相关开关
+
+---
 
 <a id="quick-start"></a>
 
 ## 快速开始
 
-### 使用 Docker 本地体验
-
-以下命令使用 SQLite 启动单实例，仅监听本机端口：
-
 ```bash
-mkdir -p data
 docker run --name new-api -d --restart unless-stopped \
   -p 127.0.0.1:3000:3000 \
   -e TZ=Asia/Shanghai \
@@ -175,181 +166,50 @@ docker run --name new-api -d --restart unless-stopped \
   calciumion/new-api:latest
 ```
 
-打开 [http://localhost:3000](http://localhost:3000)，按初始化向导创建管理员账号。SQLite 数据库存放在挂载的 `data` 目录中，更换容器后仍会保留。
+打开 <http://localhost:3000>，完成初始化向导。
 
-### 发起第一次请求
+然后按顺序：
 
-1. 新建渠道，填写上游 API Key、可用模型和所属分组，执行渠道测试。
-2. 配置模型价格，确保调用用户有可用额度或有效订阅。
-3. 在控制台创建 API Key，确保它能访问对应分组和模型。
-4. 对于 OpenAI 兼容客户端，将 Base URL 设为 `http://localhost:3000/v1`，密钥使用 **New API 签发的 Key**。
+1. **Subscriptions（订阅管理）** — 创建套餐；如果只用钱包可以跳过
+2. **Channels（渠道）** — 添加上游密钥并测试渠道
+3. **Redemption Codes（兑换码管理）** — 按你想要的权益类型生成兑换码
+4. 把兑换码发给用户，由他在 **Wallet（钱包）** 里兑换
 
-在终端中将 `NEW_API_KEY` 环境变量设为该密钥，查询它可以访问的模型：
-
-```bash
-curl --fail-with-body http://localhost:3000/v1/models \
-  -H "Authorization: Bearer ${NEW_API_KEY}"
-```
-
-然后调用 Responses，将 `your-enabled-model` 替换为已启用且支持该接口的模型名称：
-
-```bash
-curl --fail-with-body http://localhost:3000/v1/responses \
-  -H "Authorization: Bearer ${NEW_API_KEY}" \
-  -H "Content-Type: application/json" \
-  -d '{"model":"your-enabled-model","input":"Hello!"}'
-```
-
-<a id="deployment"></a>
-
-## 部署与运维
-
-### Docker Compose
-
-仓库的 [Compose 配置](./docker-compose.yml) 默认启动 **New API + PostgreSQL + Redis**，并提供 MySQL 和独立 ClickHouse 日志库的配置示例。
-
-```bash
-git clone https://github.com/QuantumNous/new-api.git
-cd new-api
-```
-
-启动前编辑 `docker-compose.yml`：同时替换数据库、Redis 服务及对应连接串中的示例密码，并设置固定的随机 `SESSION_SECRET`（可用 `openssl rand -hex 32` 生成）。通过 HTTPS 访问控制台时，设置 `SESSION_COOKIE_SECURE=true`，并在 `SESSION_COOKIE_TRUSTED_URL` 中填写控制台对外的精确 HTTPS Origin。
-
-```bash
-docker compose up -d
-docker compose logs -f new-api
-```
-
-### 存储与配置
-
-| 组件 | 可选方案 |
-| --- | --- |
-| 主数据库 | SQLite、MySQL ≥ 5.7.8、PostgreSQL ≥ 9.6 |
-| 独立日志库 | 通过 `LOG_SQL_DSN` 配置，额外支持 ClickHouse |
-| 缓存 | 可选 Redis 与内存缓存；多节点需要共享限流额度时使用共享 Redis |
-| 容器平台 | Linux amd64 / arm64 |
-
-| 环境变量 | 用途 |
-| --- | --- |
-| `SQL_DSN` | 主数据库连接串；未设置时使用 SQLite |
-| `LOG_SQL_DSN` | 可选的独立日志数据库连接串 |
-| `REDIS_CONN_STRING` | Redis 连接串 |
-| `SESSION_SECRET` | 持久保存的鉴权密钥，所有节点必须一致 |
-| `CRYPTO_SECRET` | 默认使用 `SESSION_SECRET`；共享 Redis 的节点必须使用相同的有效值 |
-| `SESSION_COOKIE_SECURE` | HTTPS 控制台设为 `true`，启用 Secure 刷新 Cookie 和严格的刷新／退出来源校验 |
-| `SESSION_COOKIE_TRUSTED_URL` | Secure 模式必填：以逗号分隔的精确 HTTPS Origin，不含路径或通配符；本地 HTTP 模式不设置 |
-| `TRUSTED_PROXIES` | 可信反向代理 IP/CIDR，或 `none`；按实际网络显式配置 |
-
-完整配置见[环境变量示例](./.env.example)、[环境变量文档](https://docs.newapi.ai/zh/docs/installation/config-maintenance/environment-variables)和[鉴权与登录会话说明](./docs/authentication.md)。容器变量应通过 Compose 的 `environment` 或 `env_file` 注入；只复制 `.env.example` 不会自动将变量传入容器。
-
-正式部署时使用 HTTPS，并配置反向代理支持流式响应与 WebSocket 升级。持久化并备份数据库和挂载数据。多节点必须共用主数据库和鉴权密钥；独立 Redis 或内存限流器会按节点分别计数。不同拓扑下的会话传播行为见鉴权文档。
-
-从[发布页](https://github.com/QuantumNous/new-api/releases)选择明确的镜像版本，阅读升级说明并先备份再升级。`latest` 会随发布构建变化；已有实例应按实际版本评估迁移与兼容性。
-
-<a id="development"></a>
-
-## 开发与扩展
-
-后端使用 Go 和 Gin；控制台使用 React 19、TypeScript、Rsbuild、TanStack 与 Tailwind CSS 4。前端依赖和脚本使用 Bun；Go 语言基线见 [go.mod](./go.mod)，容器构建工具链见 [Dockerfile](./Dockerfile)。
-
-后端会嵌入 `web/dist`，首次启动前先构建前端：
-
-```bash
-# 仓库根目录
-cd web
-bun install --frozen-lockfile
-bun run build
-cd ..
-go run .
-```
-
-在另一个终端启动前端开发服务器：
-
-```bash
-cd web
-bun run dev -- --port 5173
-```
-
-访问 [http://localhost:5173](http://localhost:5173)，开发服务器会将 API 请求代理到 3000 端口的后端。需要容器化开发后端时，参阅 [docker-compose.dev.yml](./docker-compose.dev.yml) 和 [makefile](./makefile) 中的 `make dev`。
-
-| 目录 | 职责 |
-| --- | --- |
-| `router/`、`middleware/`、`controller/` | HTTP 路由、访问校验与 API 处理 |
-| `relay/` | 上游适配与请求调度 |
-| `service/`、`model/` | 业务逻辑与持久化 |
-| [relaykit/](./relaykit/README.md) | 可独立构建的协议 DTO 与转换 Go 模块 |
-| [plugins/tasks/](./plugins/tasks/) | JavaScript 任务插件；编写方式与宿主边界见 [Task Plugin API v1](./docs/plugin-api/v1.md) |
-| `web/` | Web 控制台，参阅[前端开发约定](./web/AGENTS.md) |
-| [electron/](./electron/README.md) | 桌面封装与打包 |
-
-贡献前请阅读 [AGENTS.md](./AGENTS.md)。按改动范围执行检查：Go 模块使用 `make test`；前端在 `web/` 下运行 `bun run typecheck`、`bun run lint`、`bun run test` 和 `bun run build`。修改 RelayKit 后还必须在 `relaykit/` 下执行 `GOWORK=off go build ./...`。
-
-<a id="documentation"></a>
-
-## 文档与社区
-
-| 资源 | 入口 |
-| --- | --- |
-| 官方文档 | [使用指南](https://docs.newapi.ai/zh/docs) · [安装部署](https://docs.newapi.ai/zh/docs/installation) · [API 参考](https://docs.newapi.ai/zh/docs/api) |
-| 项目导读 | [DeepWiki](https://deepwiki.com/QuantumNous/new-api) |
-| 使用问题与交流 | [常见问题](https://docs.newapi.ai/zh/docs/support/faq) · [社区渠道](https://docs.newapi.ai/zh/docs/support/community-interaction) |
-| 缺陷与功能建议 | [GitHub Issues](https://github.com/QuantumNous/new-api/issues) |
-| 安全漏洞 | 按[安全政策](./.github/SECURITY.md)进行私下报告 |
-
-反馈问题时请附上版本、部署方式、复现步骤及脱敏日志。欢迎贡献文档、翻译、渠道适配和有针对性的回归测试。
+配置、存储、多节点部署和完整的环境变量说明与上游一致，见[环境变量示例](./.env.example)和[上游文档](https://docs.newapi.ai/en/docs)。
 
 ---
 
-## 🔗 相关项目
+<a id="upstream"></a>
 
-### 上游项目
+## 上游项目
 
-| 项目 | 说明 |
-|------|------|
-| [One API](https://github.com/songquanpeng/one-api) | 原版项目基础 |
-| [Midjourney-Proxy](https://github.com/novicezk/midjourney-proxy) | Midjourney 接口支持 |
+本分支跟踪 [QuantumNous/new-api](https://github.com/QuantumNous/new-api) 并合并其版本。
 
-### 配套工具
+| | |
+| --- | --- |
+| 上游项目 | <https://github.com/QuantumNous/new-api> |
+| 项目源头 | [One API](https://github.com/songquanpeng/one-api)（MIT） |
+| 文档 | <https://docs.newapi.ai/en/docs> |
+| 协议、渠道、插件 | 见上游 README 与 [RelayKit](./relaykit/README.md) |
 
-| 项目 | 说明 |
-|------|------|
-| [new-api-key-tool](https://github.com/Calcium-Ion/new-api-key-tool) | Key 额度查询工具 |
-| [new-api-horizon](https://github.com/Calcium-Ion/new-api-horizon) | New API 高性能优化版 |
+**以下能力直接来自上游，未做修改**：模型路由与渠道管理、四种文本协议及其转换、图像/音频/实时接口、JavaScript 任务插件系统、Passkey / TOTP / OAuth / OIDC、审计日志、国际化、控制台框架、部署方式。
 
----
+### 与上游保持同步
 
-## 📜 许可证
+```bash
+git remote add upstream https://github.com/QuantumNous/new-api.git
+git fetch upstream
+git merge upstream/main
+```
 
-本项目采用 [GNU Affero 通用公共许可证 v3.0 (AGPLv3)](./LICENSE) 授权。
-
-根据 AGPLv3 第 7 条，本项目还适用[附加条款](./NOTICE)。修改版本必须在适当法律声明及界面中显著的关于、法律、页脚或署名位置保留作者署名 `Frontend design and development by New API contributors.`，并保留指向原项目 <https://github.com/QuantumNous/new-api> 的可见链接。
-
-本项目为开源项目，在 [One API](https://github.com/songquanpeng/one-api)（MIT 许可证）的基础上进行二次开发。
-
-如果您所在的组织政策不允许使用 AGPLv3 许可的软件，或您希望规避 AGPLv3 的开源义务，请发送邮件至：[support@quantumnous.com](mailto:support@quantumnous.com)
-
-署名及依赖声明见 [NOTICE](./NOTICE) 和[第三方许可证](./THIRD-PARTY-LICENSES.md)。
+本分支的改动集中在计费、兑换码、订阅、福利相关代码。预期冲突会出现在 `service/billing*.go`、`model/redemption.go`、`model/subscription.go`、`model/welfare_quota.go` 以及对应的前端模块。
 
 ---
 
-## 🌟 Star History
+## 许可证
 
-<div align="center">
+GNU Affero 通用公共许可证 v3.0。见 [LICENSE](./LICENSE)、[NOTICE](./NOTICE) 和 [THIRD-PARTY-LICENSES.md](./THIRD-PARTY-LICENSES.md)。
 
-[![Star History Chart](https://api.star-history.com/svg?repos=Calcium-Ion/new-api&type=Date)](https://star-history.com/#Calcium-Ion/new-api&Date)
+本项目基于 [One API](https://github.com/songquanpeng/one-api)（MIT）经 [new-api](https://github.com/QuantumNous/new-api) 开发而来。
 
-</div>
-
----
-
-<div align="center">
-
-### 💖 感谢使用 New API
-
-如果这个项目对你有帮助，欢迎给我们一个 ⭐️ Star！
-
-**[官方文档](https://docs.newapi.ai/zh/docs)** • **[问题反馈](https://github.com/Calcium-Ion/new-api/issues)** • **[最新发布](https://github.com/Calcium-Ion/new-api/releases)**
-
-<sub>Built with ❤️ by QuantumNous</sub>
-
-</div>
+请合法使用。通过授权渠道获取上游密钥与模型访问权限，并遵守上游服务条款及所在司法辖区的法律法规。在多个辖区，对外提供公开 AI 服务还涉及备案、内容安全、实名等义务。
