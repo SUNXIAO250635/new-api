@@ -4,170 +4,153 @@
 
 # New API
 
-**An AI gateway for models, applications, and agents**
+**An AI gateway, with billing and access control built for resale**
 
 <p align="center">
-  <a href="./README.zh_CN.md">简体中文</a> |
-  <a href="./README.zh_TW.md">繁體中文</a> |
-  <strong>English</strong> |
-  <a href="./README.fr.md">Français</a> |
-  <a href="./README.ja.md">日本語</a>
-</p>
-
-<p align="center">
-  <a href="https://raw.githubusercontent.com/Calcium-Ion/new-api/main/LICENSE">
-    <img src="https://img.shields.io/github/license/Calcium-Ion/new-api?color=brightgreen" alt="license">
-  </a><!--
-  --><a href="https://github.com/Calcium-Ion/new-api/releases/latest">
-    <img src="https://img.shields.io/github/v/release/Calcium-Ion/new-api?color=brightgreen&include_prereleases" alt="release">
-  </a><!--
-  --><a href="https://hub.docker.com/r/CalciumIon/new-api">
-    <img src="https://img.shields.io/badge/docker-dockerHub-blue" alt="docker">
-  </a>
-  <a href="https://atomgit.com/QuantumNous/new-api" target="_blank">
-    <img alt="AtomGit G-Star" src="https://atomgit.com/QuantumNous/new-api/star/badge.svg"/>
-  </a>
-</p>
-
-<p align="center">
-  <a href="https://trendshift.io/repositories/20180" target="_blank">
-    <img src="https://trendshift.io/api/badge/repositories/20180" alt="QuantumNous%2Fnew-api | Trendshift" style="width: 250px; height: 55px;" width="250" height="55"/>
-  </a>
-  <br>
-  <a href="https://hellogithub.com/repository/QuantumNous/new-api" target="_blank">
-    <img src="https://api.hellogithub.com/v1/widgets/recommend.svg?rid=539ac4217e69431684ad4a0bab768811&claim_uid=tbFPfKIDHpc4TzR" alt="Featured｜HelloGitHub" style="width: 250px; height: 54px;" width="250" height="54" />
-  </a><!--
-  -->
-  <a href="https://atomgit.com/QuantumNous/new-api" target="_blank">
-    <img alt="AtomGit G-Star" src="https://atomgit.com/QuantumNous/new-api/star/new_badge.svg" width="250" height="55" />
-  </a>
-</p>
-
-<p align="center">
-  <a href="#screenshots">Screenshots</a> •
-  <a href="#capabilities">Capabilities</a> •
-  <a href="#quick-start">Quick start</a> •
-  <a href="#deployment">Deployment</a> •
-  <a href="#development">Development</a> •
-  <a href="#documentation">Documentation</a>
+  <strong>Fork of <a href="https://github.com/QuantumNous/new-api">QuantumNous/new-api</a></strong> ·
+  <a href="#what-this-fork-adds">What this fork adds</a> ·
+  <a href="#quick-start">Quick start</a> ·
+  <a href="#upstream">Upstream</a>
 </p>
 
 </div>
 
 ---
 
-## 📝 Project Description
+## What this fork is
 
-New API is a self-hosted AI gateway for applications, agents, and teams. Connect upstream model services, expose a consistent API to your clients, and manage routing, access, usage, and costs in one place.
+This is a fork of [new-api](https://github.com/QuantumNous/new-api), a self-hosted AI gateway that aggregates 40+ upstream model providers behind one OpenAI-compatible API.
 
-Use it to share authorized model access across a team, switch providers without configuring every client again, or operate a private multi-model service with a web console. Upstreams include OpenAI, Anthropic, Google Gemini, Azure OpenAI, AWS Bedrock, Vertex AI, DeepSeek, Qwen, and other compatible services.
+Upstream already does model routing, access control, usage logging, and wallet billing. **This fork keeps all of that and adds the pieces needed to actually sell access**: subscription plans, welfare balance, a proper redemption-code system, and the accounting guarantees that go with them.
 
-> [!IMPORTANT]
-> - This project is intended solely for lawful and authorized AI API gateway, organization-level authentication, multi-model management, usage analytics, cost accounting, and private deployment scenarios.
-> - Users must lawfully obtain upstream API keys, accounts, model services, and interface permissions, and must comply with upstream terms of service and applicable laws and regulations.
-> - Users should ensure their use complies with upstream terms of service and applicable laws and regulations.
-> - When providing generative AI services to the public, users should comply with applicable regulatory requirements and fulfill all filing, licensing, content safety, real-name verification, log retention, tax, and upstream authorization obligations required by their jurisdiction.
-
-<!-- -->
-
-> [!WARNING]
-> When operating this project as a public generative AI service or API resale service, users should first complete all required filing, licensing, content safety, real-name verification, log retention, tax, payment, and upstream authorization obligations.
+Everything below is what this fork adds or changes. For anything not listed here — protocols, channels, deployment, plugin system, console basics — see [upstream](#upstream); the behavior is the same.
 
 ---
 
-<a id="screenshots"></a>
+<a id="what-this-fork-adds"></a>
 
-## Screenshots
+## What this fork adds
 
-Accounts, channels, plugin installation states, usage, prices, and costs shown below are simulated data. The marketplace displays the official plugin catalog. Click an image to view it at full size.
+### 1. Subscription plans
 
-| Usage dashboard | Plugin marketplace |
+Upstream has a wallet. This fork adds a second funding source with its own lifecycle.
+
+| Capability | Detail |
 | --- | --- |
-| [![Usage dashboard with simulated requests, costs, and performance metrics](assets/screenshots/dashboard.en.jpg)](assets/screenshots/dashboard.en.jpg) | [![Official plugin marketplace with simulated installation status](assets/screenshots/plugin-marketplace.en.jpg)](assets/screenshots/plugin-marketplace.en.jpg) |
-| **Model square** | **Usage logs** |
-| [![Model square with simulated model pricing and availability](assets/screenshots/models.en.jpg)](assets/screenshots/models.en.jpg) | [![Usage logs with simulated tokens, costs, and response times](assets/screenshots/usage-logs.en.jpg)](assets/screenshots/usage-logs.en.jpg) |
+| Plan management | Create/edit/disable plans; price, duration, total quota, upgrade and downgrade groups |
+| Quota reset | Reset used quota on a cycle: never / daily / weekly / monthly / custom seconds |
+| Usage groups | Restrict a plan to specific routing groups; empty means all groups |
+| Concurrency limit | Cap simultaneous requests per subscription (0 = unlimited) |
+| Wallet overflow | Choose whether a plan may fall back to wallet balance when its quota runs out |
+| Purchase limit | Max purchases per user per plan |
+| Grant paths | Balance payment, Stripe, Creem, Epay, WaffoPancake, redemption code, or admin bind |
+| Admin operations | Bind, invalidate, delete, reset by plan or by user |
 
----
+Console: **Subscriptions** — one surface for both admins (plan create/edit, bind, invalidate, reset) and users (their own subscriptions, purchase, billing strategy).
 
-## 🤝 Trusted Partners
+### 2. Welfare balance
 
-<p align="center">
-  <em>No particular order</em>
-</p>
+A separate, administrator-granted balance that sits alongside the wallet.
 
-<p align="center">
-  <a href="https://www.cherry-ai.com/" target="_blank">
-    <img src="./docs/images/cherry-studio.png" alt="Cherry Studio" height="80" />
-  </a><!--
-  --><a href="https://github.com/iOfficeAI/AionUi/" target="_blank">
-    <img src="./docs/images/aionui.png" alt="Aion UI" height="80" />
-  </a><!--
-  --><a href="https://bda.pku.edu.cn/" target="_blank">
-    <img src="./docs/images/pku.png" alt="Peking University" height="80" />
-  </a><!--
-  --><a href="https://www.aliyun.com/" target="_blank">
-    <img src="./docs/images/aliyun.png" alt="Alibaba Cloud" height="80" />
-  </a><!--
-  --><a href="https://io.net/" target="_blank">
-    <img src="./docs/images/io-net.png" alt="IO.NET" height="80" />
-  </a>
-</p>
-
----
-
-## 🙏 Special Thanks
-
-<p align="center">
-  <a href="https://www.jetbrains.com/?from=new-api" target="_blank">
-    <img src="https://resources.jetbrains.com/storage/products/company/brand/logos/jb_beam.png" alt="JetBrains Logo" width="120" />
-  </a>
-</p>
-
-<p align="center">
-  <strong>Thanks to <a href="https://www.jetbrains.com/?from=new-api">JetBrains</a> for providing free open-source development license for this project</strong>
-</p>
-
----
-
-<a id="capabilities"></a>
-
-## Capabilities
-
-| Area | What you can do |
+| Capability | Detail |
 | --- | --- |
-| Model access | Use OpenAI Chat Completions, Responses, Anthropic Messages, and Gemini APIs; stream responses and use tools, reasoning, and multimodal inputs where supported |
-| Routing | Configure model mappings, channel priorities and weights, retries, channel affinity, and multiple upstream keys |
-| Usage and costs | Manage quotas, subscriptions, usage logs, cache accounting, and expression-based pricing for different usage tiers |
-| Access control | Manage users, groups, fine-grained permissions, and API key restrictions; use OAuth/OIDC, passkeys, two-factor authentication, and login session management |
-| Asynchronous tasks | Extend image, video, and other task APIs with JavaScript plugins, including task status and output retrieval |
-| Web console | Configure channels and models, inspect usage and audit logs, and try models in the playground; available in English, Simplified Chinese, Traditional Chinese, French, Japanese, Russian, and Vietnamese |
+| Admin grant | Set any user's welfare balance and its expiry from the user edit dialog |
+| Consumption order | Welfare is spent before wallet and subscription when it can cover the request |
+| Expiry | Optional absolute expiry; expired balance is never charged |
+| Version fencing | Every grant bumps a version. Reservations, settlement, and refunds are pinned to the version that funded them, so an administrator override mid-request cannot redirect quota to a different batch |
 
-### Protocols and endpoints
+Console: **Users → Set Welfare Balance**.
 
-| Interface | Common endpoints |
+### 3. Redemption codes
+
+Upstream's redemption codes only add wallet quota. This fork turns them into a real distribution mechanism.
+
+| Capability | Detail |
 | --- | --- |
-| OpenAI Chat / Responses | `POST /v1/chat/completions`, `POST /v1/responses` |
-| Anthropic Messages | `POST /v1/messages` |
-| Gemini | `POST /v1beta/models/{model}:generateContent`, `POST /v1beta/models/{model}:streamGenerateContent` |
-| Realtime / Responses WebSocket | `GET /v1/realtime`, `GET /v1/responses` (WebSocket upgrade) |
-| Images / audio | `/v1/images/generations`, `/v1/images/edits`, `/v1/audio/speech`, `/v1/audio/transcriptions`, `/v1/audio/translations` |
-| Embeddings / rerank | `POST /v1/embeddings`, `POST /v1/rerank` |
-| Task plugins | `POST /v1/tasks/{pluginKey}`, `GET /v1/tasks/{taskId}`, plus routes declared by each plugin |
+| Three benefit types | **Quota** (wallet top-up), **Welfare** (welfare balance with its own expiry), **Subscription** (grants a plan) |
+| Batch generation | Create 1–100 codes in one operation, sharing a batch ID |
+| Batch claim policy | By default each account may redeem only one code per batch; can be relaxed per batch |
+| Batch delete | Delete selected codes, or sweep all used/expired/disabled ones |
+| Export | Stream matching codes to a TXT file, one key per line |
+| Expiry | Optional per-code expiry, independent of the benefit's own expiry |
+| Audit | Every create, update, delete, and export is audit-logged |
 
-[RelayKit](./relaykit/README.md) provides request, response, and streaming conversion between the four text protocols. Available features depend on the channel, upstream model, and conversion path; protocol-specific tools and fields may not map exactly. WebSocket support also requires a compatible upstream and channel configuration.
+Console: **Redemption Codes**. Self-service redemption stays in **Wallet**.
 
-This README describes the current source tree. Check the release notes for the version you deploy.
+### 4. Billing strategy and funding fallback
+
+Upstream picks a funding source implicitly. This fork lets each user choose, and makes the fallback explicit.
+
+| Strategy | Behavior |
+| --- | --- |
+| Subscription First | Try subscription, fall back to wallet if allowed |
+| Wallet First | Try wallet, fall back to subscription if allowed |
+| Subscription Only | Never touch the wallet |
+| Wallet Only | Never touch subscriptions |
+
+Welfare balance is consumed automatically before either, when it can cover the request.
+
+Console: **Wallet** — strategy selector and redemption entry.
+
+### 5. Ordered token groups
+
+Upstream tokens select a single group. This fork replaces that with an ordered group list.
+
+- A token can name several groups, tried in order — the same channel-affinity and retry machinery decides the winner.
+- Group choice is validated against what the user's own group may actually use.
+- Ordered selection is also what subscription usage groups and plan restrictions are checked against.
+
+Console: **Keys → Auto groups**.
+
+### 6. Registration and logging controls
+
+| Option | Effect |
+| --- | --- |
+| Restrict same-IP registration | One account per IP address. Enforced with a unique claim table plus per-database locking (advisory lock on PostgreSQL, locking read on MySQL, single-writer on SQLite) |
+| Force IP logging | Overrides per-user preference: every usage and error log records the client IP |
+
+Console: **System Settings → Basic Authentication**.
+
+### 7. Accounting guarantees
+
+The billing path was reworked to survive failure, not just the happy path.
+
+| Mechanism | What it prevents |
+| --- | --- |
+| Durable refund records | A failed request writes a refund record before touching balances; a worker retries until it lands. Idempotent per request ID and per component (funding, token) |
+| Bounded retries | A permanently impossible refund is parked as `failed` after 20 attempts instead of retrying forever |
+| Settlement reconciliation | When a token adjustment fails after funding settled, the desired target is persisted and a worker converges it |
+| Pre-consume restore | If persisting settled task markers fails, the session rolls back to its durable reservation so a later poll cannot charge the same delta twice |
+| Version-fenced welfare | Reservations, settlement, and refunds all carry the grant version (see above) |
+
+### 8. Security hardening
+
+Fixes applied on top of upstream, each with a regression test:
+
+| Fix | Detail |
+| --- | --- |
+| Welfare refund fencing | A welfare task without a recorded grant version is refused rather than refunded into whatever batch is currently active |
+| Disabled plans unreachable | Redemption codes cannot grant a disabled plan; both code creation and redemption check `enabled` |
+| Concurrency lease freshness | A subscription lease is only re-armed for a pre-consume record inside the lease TTL, so a replayed request ID cannot occupy a slot it no longer owns |
+| Notification URL validation | Webhook, Bark, and Gotify URLs are validated against the SSRF fetch policy when saved, not only when delivered |
+| Dependency CVEs | 9 vulnerabilities in `x/net`, `x/image`, `x/text` cleared; `govulncheck` reports zero |
+
+### 9. Console changes
+
+- **Users** — welfare balance field and the `Set Welfare Balance` action
+- **Keys** — auto-group ordering editor
+- **Wallet** — subscription plan cards, billing strategy selector, redemption entry
+- **Subscriptions** — plan list, purchase, and self-management
+- **Redemption Codes** — full management surface with bulk actions and export
+- **System Settings → Basic Authentication** — the two IP controls above
+
+---
 
 <a id="quick-start"></a>
 
 ## Quick start
 
-### Try locally with Docker
-
-This starts a single instance with SQLite and binds it to localhost:
-
 ```bash
-mkdir -p data
 docker run --name new-api -d --restart unless-stopped \
   -p 127.0.0.1:3000:3000 \
   -e TZ=Asia/Shanghai \
@@ -175,187 +158,50 @@ docker run --name new-api -d --restart unless-stopped \
   calciumion/new-api:latest
 ```
 
-Open [http://localhost:3000](http://localhost:3000) and complete the setup wizard to create the administrator account. The `data` directory persists the SQLite database across container replacements.
+Open <http://localhost:3000> and complete the setup wizard.
 
-### Make your first request
+Then, in order:
 
-1. Add a channel with your upstream API key, available models, and group assignment; run a channel test.
-2. Configure model pricing and ensure the user has quota or a valid subscription.
-3. Create an API key in the console with access to the same group and models.
-4. Set your client's base URL to `http://localhost:3000/v1` for OpenAI-compatible clients and use the **New API-issued key**.
+1. **Subscriptions** — create a plan, or skip this and use the wallet only
+2. **Channels** — add an upstream key and run a channel test
+3. **Redemption Codes** — generate codes for the benefit type you want
+4. Hand a code to a user; they redeem it in **Wallet**
 
-Set `NEW_API_KEY` in your shell to that key. List the models accessible to it:
-
-```bash
-curl --fail-with-body http://localhost:3000/v1/models \
-  -H "Authorization: Bearer ${NEW_API_KEY}"
-```
-
-Then call Responses, replacing `your-enabled-model` with an enabled model that supports this interface:
-
-```bash
-curl --fail-with-body http://localhost:3000/v1/responses \
-  -H "Authorization: Bearer ${NEW_API_KEY}" \
-  -H "Content-Type: application/json" \
-  -d '{"model":"your-enabled-model","input":"Hello!"}'
-```
-
-<a id="deployment"></a>
-
-## Deployment
-
-### Docker Compose
-
-The repository's [Compose configuration](./docker-compose.yml) starts **New API + PostgreSQL + Redis** by default. It also contains examples for MySQL and a separate ClickHouse log database.
-
-```bash
-git clone https://github.com/QuantumNous/new-api.git
-cd new-api
-```
-
-Before starting, edit `docker-compose.yml`: replace the database and Redis example passwords in both the services and connection strings, and set a persistent random `SESSION_SECRET` (generate one with `openssl rand -hex 32`). For an HTTPS console, configure `SESSION_COOKIE_SECURE=true` and `SESSION_COOKIE_TRUSTED_URL` with its exact public HTTPS origin.
-
-```bash
-docker compose up -d
-docker compose logs -f new-api
-```
-
-### Storage and configuration
-
-| Component | Options |
-| --- | --- |
-| Main database | SQLite, MySQL ≥ 5.7.8, or PostgreSQL ≥ 9.6 |
-| Separate log database | Configure with `LOG_SQL_DSN`; also supports ClickHouse |
-| Cache | Optional Redis plus in-memory caching; use shared Redis when application nodes need shared rate limits |
-| Container platforms | Linux amd64 / arm64 |
-
-| Variable | Purpose |
-| --- | --- |
-| `SQL_DSN` | Main database connection; unset uses SQLite |
-| `LOG_SQL_DSN` | Optional separate log database connection |
-| `REDIS_CONN_STRING` | Redis connection string |
-| `SESSION_SECRET` | Persistent authentication secret; all nodes must use the same value |
-| `CRYPTO_SECRET` | Defaults to `SESSION_SECRET`; nodes sharing Redis must use the same effective value |
-| `SESSION_COOKIE_SECURE` | Set to `true` for an HTTPS console; enables Secure refresh cookies and strict refresh/logout origin checks |
-| `SESSION_COOKIE_TRUSTED_URL` | Required in Secure mode: comma-separated exact HTTPS origins, without paths or wildcards; leave unset for local HTTP |
-| `TRUSTED_PROXIES` | Trusted reverse-proxy IPs/CIDRs, or `none`; explicitly configure for your network |
-
-See the [environment example](./.env.example), [environment reference](https://docs.newapi.ai/en/docs/installation/config-maintenance/environment-variables), and [authentication and session guide](./docs/authentication.md) for full configuration. Configure container variables in Compose's `environment` or `env_file`; copying `.env.example` alone does not inject variables into the container.
-
-For production, put the console behind HTTPS and configure your reverse proxy for streaming and WebSocket upgrades. Persist and back up the database and mounted data. Multi-node deployments must share the main database and authentication secrets; separate Redis instances or in-memory rate limiters count limits independently per node. The session guide describes propagation behavior for each topology.
-
-Pin an image version from [Releases](https://github.com/QuantumNous/new-api/releases), review its upgrade notes, and back up before upgrading. The `latest` tag follows published builds and can change; migrations and compatibility must be assessed for your existing installation.
-
-<a id="development"></a>
-
-## Development and extensions
-
-The backend uses Go and Gin. The web console uses React 19, TypeScript, Rsbuild, TanStack, and Tailwind CSS 4. Use Bun for frontend dependencies and scripts; see [go.mod](./go.mod) for the Go language baseline and [Dockerfile](./Dockerfile) for the container build toolchain.
-
-Build the frontend before starting the backend, which embeds `web/dist`:
-
-```bash
-# Repository root
-cd web
-bun install --frozen-lockfile
-bun run build
-cd ..
-go run .
-```
-
-In a second terminal, start the frontend development server:
-
-```bash
-cd web
-bun run dev -- --port 5173
-```
-
-Open [http://localhost:5173](http://localhost:5173); the development server proxies API requests to the backend on port 3000. For a containerized development backend, see [docker-compose.dev.yml](./docker-compose.dev.yml) and the `make dev` target in [makefile](./makefile).
-
-| Location | Responsibility |
-| --- | --- |
-| `router/`, `middleware/`, `controller/` | HTTP routes, access checks, and API handlers |
-| `relay/` | Upstream adapters and request routing |
-| `service/`, `model/` | Business logic and persistence |
-| [relaykit/](./relaykit/README.md) | Independently buildable Go module for protocol DTOs and conversions |
-| [plugins/tasks/](./plugins/tasks/) | JavaScript task plugins; see [Task Plugin API v1](./docs/plugin-api/v1.md) for authoring and host boundaries |
-| `web/` | Web console; see [frontend conventions](./web/AGENTS.md) |
-| [electron/](./electron/README.md) | Desktop wrapper and packaging |
-
-Read [AGENTS.md](./AGENTS.md) before contributing. Run checks appropriate to your change, including `make test` for the Go modules and `bun run typecheck`, `bun run lint`, `bun run test`, and `bun run build` in `web/` for frontend changes. Changes to RelayKit must also pass `GOWORK=off go build ./...` from `relaykit/`.
-
-<a id="documentation"></a>
-
-## Documentation and community
-
-| Resource | Link |
-| --- | --- |
-| Official documentation | [Guides](https://docs.newapi.ai/en/docs) · [Installation](https://docs.newapi.ai/en/docs/installation) · [API reference](https://docs.newapi.ai/en/docs/api) |
-| Project exploration | [DeepWiki](https://deepwiki.com/QuantumNous/new-api) |
-| Questions and discussion | [FAQ](https://docs.newapi.ai/en/docs/support/faq) · [Community](https://docs.newapi.ai/en/docs/support/community-interaction) |
-| Bugs and feature requests | [GitHub Issues](https://github.com/QuantumNous/new-api/issues) |
-| Security reports | Follow the [security policy](./.github/SECURITY.md) for private reporting |
-
-For bug reports, include the version, deployment method, reproduction steps, and redacted logs. Documentation, translations, provider integrations, and focused regression tests are all welcome contributions.
+Configuration, storage, multi-node deployment, and the full variable reference are identical to upstream: see the [environment example](./.env.example) and [upstream docs](https://docs.newapi.ai/en/docs).
 
 ---
 
-## 🔗 Related Projects
+<a id="upstream"></a>
 
-### Upstream Projects
+## Upstream
 
-| Project | Description |
-|------|------|
-| [One API](https://github.com/songquanpeng/one-api) | Original project base |
-| [Midjourney-Proxy](https://github.com/novicezk/midjourney-proxy) | Midjourney interface support |
+This fork tracks [QuantumNous/new-api](https://github.com/QuantumNous/new-api) and merges its releases.
 
-### Supporting Tools
+| | |
+| --- | --- |
+| Upstream project | <https://github.com/QuantumNous/new-api> |
+| Based on | [One API](https://github.com/songquanpeng/one-api) (MIT) |
+| Documentation | <https://docs.newapi.ai/en/docs> |
+| Protocols, channels, plugins | See upstream README and [RelayKit](./relaykit/README.md) |
 
-| Project | Description |
-|------|------|
-| [new-api-key-tool](https://github.com/Calcium-Ion/new-api-key-tool) | Key quota query tool |
-| [new-api-horizon](https://github.com/Calcium-Ion/new-api-horizon) | New API high-performance optimized version |
+**What comes from upstream unchanged:** model routing and channel management, the four text protocols and their conversions, image/audio/realtime endpoints, the JavaScript task plugin system, passkeys / TOTP / OAuth / OIDC, audit logging, i18n, the console shell, and the deployment story.
 
----
+### Keeping in sync
 
-## 📜 License
+```bash
+git remote add upstream https://github.com/QuantumNous/new-api.git
+git fetch upstream
+git merge upstream/main
+```
 
-This project is licensed under the [GNU Affero General Public License v3.0 (AGPLv3)](./LICENSE).
-
-Additional terms under AGPLv3 Section 7 apply. Modified versions must preserve
-the author attribution notice `Frontend design and development by New API
-contributors.` in the appropriate legal notices and in any prominent about,
-legal, footer, or attribution location presented by the user interface.
-
-Modified versions that present a user interface must also preserve a visible
-link to the original project: <https://github.com/QuantumNous/new-api>.
-
-This is an open-source project developed based on [One API](https://github.com/songquanpeng/one-api) (MIT License).
-
-If your organization's policies do not permit the use of AGPLv3-licensed software, or if you wish to avoid the open-source obligations of AGPLv3, please contact us at: [support@quantumnous.com](mailto:support@quantumnous.com)
-
-See [NOTICE](./NOTICE) and [third-party licenses](./THIRD-PARTY-LICENSES.md) for attribution and dependency notices.
+The fork's changes are concentrated in billing, redemption, subscription, and welfare code. Expect conflicts in `service/billing*.go`, `model/redemption.go`, `model/subscription.go`, `model/welfare_quota.go`, and the corresponding frontend features.
 
 ---
 
-## 🌟 Star History
+## License
 
-<div align="center">
+GNU Affero General Public License v3.0. See [LICENSE](./LICENSE), [NOTICE](./NOTICE), and [THIRD-PARTY-LICENSES.md](./THIRD-PARTY-LICENSES.md).
 
-[![Star History Chart](https://api.star-history.com/svg?repos=Calcium-Ion/new-api&type=Date)](https://star-history.com/#Calcium-Ion/new-api&Date)
+This project is developed from [One API](https://github.com/songquanpeng/one-api) (MIT) via [new-api](https://github.com/QuantumNous/new-api).
 
-</div>
-
----
-
-<div align="center">
-
-### 💖 Thank you for using New API
-
-If this project is helpful to you, welcome to give us a ⭐️ Star！
-
-**[Official Documentation](https://docs.newapi.ai/en/docs)** • **[Issue Feedback](https://github.com/Calcium-Ion/new-api/issues)** • **[Latest Release](https://github.com/Calcium-Ion/new-api/releases)**
-
-<sub>Built with ❤️ by QuantumNous</sub>
-
-</div>
+Use it lawfully. Obtain upstream keys and model access through authorized means and comply with upstream terms and the laws of your jurisdiction. Operating a public AI service carries filing, content-safety, and real-name obligations in many jurisdictions.
