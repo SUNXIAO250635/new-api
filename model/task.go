@@ -595,10 +595,11 @@ func (t *Task) UpdateBillingState() error {
 	// persisted yet makes GORM refuse a struct update whose selected fields all
 	// hold zero values ("WHERE conditions required"), while a single-row SQL
 	// update stays well formed and matches zero rows.
+	// Pass JSON as text: PostgreSQL's simple protocol encodes []byte as bytea.
 	return DB.Model(t).
 		UpdateColumns(map[string]any{
 			"quota":                    t.Quota,
-			"private_data":             privateData,
+			"private_data":             string(privateData),
 			"funding_refund_pending":   t.FundingRefundPending,
 			"token_settlement_pending": t.TokenSettlementPending,
 			"token_settlement_target":  t.TokenSettlementTarget,

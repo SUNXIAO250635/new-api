@@ -35,6 +35,7 @@ test('subscription redemption requires a selected plan', () => {
     quota_dollars: 0,
     plan_id: 0,
     allow_same_user: false,
+    expired_time: null,
     count: 1,
   })
 
@@ -51,6 +52,7 @@ test('subscription redemption payload grants the plan without quota', () => {
     quota_dollars: 99,
     plan_id: 7,
     allow_same_user: false,
+    expired_time: null,
     count: 3,
   })
 
@@ -68,6 +70,7 @@ test('welfare redemption payload grants welfare quota without a plan', () => {
     quota_dollars: 25,
     plan_id: 9,
     allow_same_user: true,
+    expired_time: null,
     welfare_expires_at: welfareExpiresAt,
     count: 2,
   })

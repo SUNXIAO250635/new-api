@@ -48,7 +48,7 @@ export function getRedemptionFormSchema(t: TFunction) {
       quota_dollars: z.number(),
       plan_id: z.number(),
       allow_same_user: z.boolean(),
-      expired_time: z.date().optional(),
+      expired_time: z.date().nullable(),
       welfare_expires_at: z.date().optional(),
       count: z
         .number()
@@ -105,7 +105,7 @@ export type RedemptionFormValues = {
   quota_dollars: number
   plan_id: number
   allow_same_user: boolean
-  expired_time?: Date
+  expired_time: Date | null
   welfare_expires_at?: Date
   count?: number
 }
@@ -120,7 +120,7 @@ export const REDEMPTION_FORM_DEFAULT_VALUES: RedemptionFormValues = {
   quota_dollars: 10,
   plan_id: 0,
   allow_same_user: false,
-  expired_time: undefined,
+  expired_time: null,
   welfare_expires_at: undefined,
   count: 1,
 }
@@ -179,7 +179,7 @@ export function transformRedemptionToFormDefaults(
     expired_time:
       redemption.expired_time > 0
         ? new Date(redemption.expired_time * 1000)
-        : undefined,
+        : null,
     count: 1,
   }
 }

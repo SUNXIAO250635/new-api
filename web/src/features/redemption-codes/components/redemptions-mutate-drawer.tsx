@@ -153,6 +153,7 @@ export function RedemptionsMutateDrawer({
   // Load existing data when updating
   useEffect(() => {
     if (!open) {
+      form.reset(REDEMPTION_FORM_DEFAULT_VALUES)
       setRedemptionLoadState('idle')
       setLoadedRedemption(null)
       return
@@ -292,7 +293,7 @@ export function RedemptionsMutateDrawer({
 
   const handleSetExpiry = (months: number, days: number, hours: number) => {
     const newDate = addTimeToDate(months, days, hours)
-    form.setValue('expired_time', newDate)
+    form.setValue('expired_time', newDate ?? null)
   }
 
   const { meta: currencyMeta } = getCurrencyDisplay()
@@ -312,15 +313,7 @@ export function RedemptionsMutateDrawer({
 
   return (
     <>
-      <Sheet
-        open={open}
-        onOpenChange={(v) => {
-          onOpenChange(v)
-          if (!v) {
-            form.reset()
-          }
-        }}
-      >
+      <Sheet open={open} onOpenChange={onOpenChange}>
         <SheetContent
           className={sideDrawerContentClassName('sm:max-w-[600px]')}
         >
@@ -516,8 +509,8 @@ export function RedemptionsMutateDrawer({
                         <div className='flex flex-col gap-2'>
                           <FormControl>
                             <DateTimePicker
-                              value={field.value}
-                              onChange={field.onChange}
+                              value={field.value ?? undefined}
+                              onChange={(date) => field.onChange(date ?? null)}
                               placeholder={t('Never expires')}
                             />
                           </FormControl>
@@ -589,93 +582,91 @@ export function RedemptionsMutateDrawer({
                     />
                   ) : null}
 
-                {!isUpdate && (
-                  <>
-                    <FormField
-                      control={form.control}
-                      name='count'
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>{t('Quantity')}</FormLabel>
-                          <FormControl>
-                            <Input
-                              {...field}
-                              type='number'
-                              min='1'
-                              max='100'
-                              placeholder={t('Number of codes to create')}
-                              onChange={(e) =>
-                                field.onChange(
-                                  Number.parseInt(e.target.value, 10) || 1
-                                )
-                              }
-                            />
-                          </FormControl>
-                          <FormDescription>
-                            {t(
-                              'Create multiple redemption codes at once (1-100)'
-                            )}
-                          </FormDescription>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
-
-                    <FormField
-                      control={form.control}
-                      name='allow_same_user'
-                      render={({ field }) => (
-                        <FormItem
-                          className={sideDrawerSwitchItemClassName()}
-                        >
-                          <div className='flex flex-col gap-0.5'>
-                            <FormLabel className='text-sm'>
-                              {t('Allow multiple redemptions per account')}
-                            </FormLabel>
-                            <FormDescription className='text-xs'>
+                  {!isUpdate && (
+                    <>
+                      <FormField
+                        control={form.control}
+                        name='count'
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel>{t('Quantity')}</FormLabel>
+                            <FormControl>
+                              <Input
+                                {...field}
+                                type='number'
+                                min='1'
+                                max='100'
+                                placeholder={t('Number of codes to create')}
+                                onChange={(e) =>
+                                  field.onChange(
+                                    Number.parseInt(e.target.value, 10) || 1
+                                  )
+                                }
+                              />
+                            </FormControl>
+                            <FormDescription>
                               {t(
-                                'When disabled, each account can redeem only one code from this batch.'
+                                'Create multiple redemption codes at once (1-100)'
                               )}
                             </FormDescription>
-                          </div>
-                          <FormControl>
-                            <Switch
-                              checked={field.value}
-                              onCheckedChange={field.onChange}
-                              aria-label={t(
-                                'Allow multiple redemptions per account'
-                              )}
-                            />
-                          </FormControl>
-                        </FormItem>
-                      )}
-                    />
-                  </>
-                )}
-              </SideDrawerSection>
-            </fieldset>
-          </form>
-        </Form>
-        <SheetFooter className={sideDrawerFooterClassName()}>
-          <SheetClose render={<Button variant='outline' />}>
-            {t('Close')}
-          </SheetClose>
-          <Button
-            form='redemption-form'
-            type='submit'
-            disabled={isSubmitting || !isUpdateReady}
-          >
-            {submitButtonLabel}
-          </Button>
-        </SheetFooter>
-      </SheetContent>
-    </Sheet>
-    {createdCodes && (
-      <RedemptionsExportDialog
-        data={createdCodes}
-        onClose={() => setCreatedCodes(null)}
-      />
-    )}
-  </>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+
+                      <FormField
+                        control={form.control}
+                        name='allow_same_user'
+                        render={({ field }) => (
+                          <FormItem className={sideDrawerSwitchItemClassName()}>
+                            <div className='flex flex-col gap-0.5'>
+                              <FormLabel className='text-sm'>
+                                {t('Allow multiple redemptions per account')}
+                              </FormLabel>
+                              <FormDescription className='text-xs'>
+                                {t(
+                                  'When disabled, each account can redeem only one code from this batch.'
+                                )}
+                              </FormDescription>
+                            </div>
+                            <FormControl>
+                              <Switch
+                                checked={field.value}
+                                onCheckedChange={field.onChange}
+                                aria-label={t(
+                                  'Allow multiple redemptions per account'
+                                )}
+                              />
+                            </FormControl>
+                          </FormItem>
+                        )}
+                      />
+                    </>
+                  )}
+                </SideDrawerSection>
+              </fieldset>
+            </form>
+          </Form>
+          <SheetFooter className={sideDrawerFooterClassName()}>
+            <SheetClose render={<Button variant='outline' />}>
+              {t('Close')}
+            </SheetClose>
+            <Button
+              form='redemption-form'
+              type='submit'
+              disabled={isSubmitting || !isUpdateReady}
+            >
+              {submitButtonLabel}
+            </Button>
+          </SheetFooter>
+        </SheetContent>
+      </Sheet>
+      {createdCodes && (
+        <RedemptionsExportDialog
+          data={createdCodes}
+          onClose={() => setCreatedCodes(null)}
+        />
+      )}
+    </>
   )
 }
