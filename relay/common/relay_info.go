@@ -99,7 +99,12 @@ type RelayInfo struct {
 	UsePrice               bool
 	RelayMode              int
 	OriginModelName        string
-	ResponseModel          *ResponseModel
+	// RequestedModelName is distinct only for virtual routing aliases.
+	RequestedModelName string
+	// RoutingUpstreamStatus is the unmodified HTTP outcome of the current
+	// candidate. A zero outcome does not prove that it is safe to replay.
+	RoutingUpstreamStatus int
+	ResponseModel         *ResponseModel
 
 	// BillingModelName is the pricing identity for this request. It is kept
 	// separate from OriginModelName and UpstreamModelName so virtual pricing

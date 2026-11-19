@@ -47,12 +47,22 @@ func AppendTaskPluginIdentityFilter(c *gin.Context, pluginKey string) {
 }
 
 type RetryParam struct {
-	Ctx          *gin.Context
-	TokenGroup   string
-	ModelName    string
-	RequestPath  string
-	Retry        *int
-	resetNextTry bool
+	Ctx         *gin.Context
+	TokenGroup  string
+	ModelName   string
+	RequestPath string
+	// EligibleAutoGroups narrows the token's authorized Auto order for an
+	// attempt whose existing subscription cannot fund every group.
+	EligibleAutoGroups []string
+	Retry              *int
+	resetNextTry       bool
+}
+
+func (p *RetryParam) autoGroups() []string {
+	if p.EligibleAutoGroups != nil {
+		return p.EligibleAutoGroups
+	}
+	return GetRequestAutoGroups(p.Ctx, common.GetContextKeyString(p.Ctx, constant.ContextKeyUserGroup))
 }
 
 func (p *RetryParam) GetRetry() int {
@@ -120,12 +130,11 @@ func CacheGetRandomSatisfiedChannel(param *RetryParam) (*model.Channel, string, 
 	var channel *model.Channel
 	var err error
 	selectGroup := param.TokenGroup
-	userGroup := common.GetContextKeyString(param.Ctx, constant.ContextKeyUserGroup)
 	filters := GetChannelConstraints(param.Ctx).Filters
 	affinityRetryOffset := param.Ctx.GetInt(ginKeyChannelAffinityRetryOffset)
 
 	if param.TokenGroup == "auto" {
-		autoGroups := GetRequestAutoGroups(param.Ctx, userGroup)
+		autoGroups := param.autoGroups()
 		if len(autoGroups) == 0 {
 			return nil, selectGroup, errors.New("auto groups is not enabled")
 		}
@@ -210,6 +219,20 @@ func CacheGetRandomSatisfiedChannel(param *RetryParam) (*model.Channel, string, 
 		}
 	}
 	return channel, selectGroup, nil
+}
+
+// ResetModelRoutingSelection starts a concrete model selection without reusing
+// another model's group cursor or affinity decision. Audit history stays intact.
+func ResetModelRoutingSelection(c *gin.Context) {
+	for _, key := range []string{
+		string(constant.ContextKeyAutoGroup), string(constant.ContextKeyAutoGroupIndex), string(constant.ContextKeyAutoGroupRetryIndex),
+		ginKeyChannelAffinityCacheKey, ginKeyChannelAffinityTTLSeconds, ginKeyChannelAffinityMeta,
+		ginKeyChannelAffinityLogInfo, ginKeyChannelAffinitySkipRetry, ginKeyChannelAffinityRetryOffset,
+	} {
+		c.Set(key, nil)
+	}
+	policy := RequestPolicy(c)
+	policy.SessionMode, policy.SessionModeSource, policy.RuleName = "", "", ""
 }
 
 func pinnedTaskPluginIdentities(c *gin.Context, expected string) ([]int, []string) {
@@ -339,8 +362,7 @@ func SelectChannelForRequest(c *gin.Context, modelName string, retry *RetryParam
 			}
 			if affinitySatisfied {
 				if usingGroup == "auto" {
-					userGroup := common.GetContextKeyString(c, constant.ContextKeyUserGroup)
-					for _, g := range GetRequestAutoGroups(c, userGroup) {
+					for _, g := range retry.autoGroups() {
 						if model.IsChannelEnabledForGroupModel(g, modelName, preferred.Id) {
 							selectGroup = g
 							common.SetContextKey(c, constant.ContextKeyAutoGroup, g)

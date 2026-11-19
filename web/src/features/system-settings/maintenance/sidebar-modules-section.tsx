@@ -146,6 +146,10 @@ export function SidebarModulesSection({
         title: t('Models'),
         description: t('Manage catalog visibility and pricing.'),
       },
+      model_routing: {
+        title: t('Model Routing'),
+        description: t('Show the Model Routing page in the admin sidebar.'),
+      },
       redemption: {
         title: t('Redeem codes'),
         description: t('Create and review invite or credit codes.'),

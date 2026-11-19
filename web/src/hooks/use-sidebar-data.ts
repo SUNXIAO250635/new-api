@@ -29,6 +29,7 @@ import {
   MessageSquare,
   PlugZap,
   Radio,
+  Route,
   ServerCog,
   Settings,
   ShieldCheck,
@@ -174,6 +175,12 @@ export function useSidebarData(badges: SidebarBadges = {}): SidebarData {
             title: t('Request processing'),
             url: '/request-processing',
             icon: Workflow,
+            requiredRole: ROLE.SUPER_ADMIN,
+          },
+          {
+            title: t('Model Routing'),
+            url: '/model-routing',
+            icon: Route,
             requiredRole: ROLE.SUPER_ADMIN,
           },
           {

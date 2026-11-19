@@ -41,10 +41,9 @@ func HandleGroupRatio(ctx *gin.Context, relayInfo *relaycommon.RelayInfo) hostty
 	}
 
 	// check auto group
-	autoGroup, exists := ctx.Get("auto_group")
-	if exists {
+	if autoGroup := ctx.GetString("auto_group"); autoGroup != "" {
 		logger.LogDebug(ctx, "final group: %s", autoGroup)
-		relayInfo.UsingGroup = autoGroup.(string)
+		relayInfo.UsingGroup = autoGroup
 	}
 
 	// check user group special ratio
@@ -99,6 +98,9 @@ func ModelPriceHelper(c *gin.Context, info *relaycommon.RelayInfo, promptTokens 
 		var success bool
 		var matchName string
 		modelRatio, success, matchName = ratio_setting.GetModelRatio(billingModelName)
+		if info.RequestedModelName != "" && !ratio_setting.HasConfiguredModelRatio(ratio_setting.FormatMatchingModelName(billingModelName)) {
+			return hosttypes.PriceData{}, modelPriceNotConfiguredError(c, matchName, info.UserId)
+		}
 		if !success {
 			acceptUnsetRatio := false
 			if info.UserSetting.AcceptUnsetRatioModel {
@@ -290,6 +292,20 @@ func HasModelBillingConfig(modelName string) bool {
 	}
 	expr, ok := billing_setting.GetBillingExpr(modelName)
 	return ok && strings.TrimSpace(expr) != ""
+}
+
+// HasConfiguredRelayModelPrice uses the same pricing identity as the relay
+// and rejects the unconfigured-ratio fallback used by personal sites.
+func HasConfiguredRelayModelPrice(modelName string) bool {
+	name := resolveBillingModelName(modelName)
+	if billing_setting.GetBillingMode(name) == billing_setting.BillingModeTieredExpr {
+		expr, ok := billing_setting.GetBillingExpr(name)
+		return ok && strings.TrimSpace(expr) != ""
+	}
+	if _, ok := ratio_setting.GetModelPrice(name, false); ok {
+		return true
+	}
+	return ratio_setting.HasConfiguredModelRatio(ratio_setting.FormatMatchingModelName(name))
 }
 
 // HasPriceOrRatioEntry reports whether name has a configured price, ratio, or

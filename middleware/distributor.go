@@ -50,6 +50,33 @@ func Distribute() func(c *gin.Context) {
 			abortWithOpenAiMessage(c, invalidRequestStatus(err), i18n.T(c, i18n.MsgDistributorInvalidRequest, map[string]any{"Error": err.Error()}))
 			return
 		}
+		policy, routingErr := enabledModelRouting(c, modelRequest.Model)
+		if routingErr != nil {
+			abortWithOpenAiMessage(c, routingErr.StatusCode, routingErr.Error(), routingErr.GetErrorCode())
+			return
+		}
+		if policy != nil && shouldSelectChannel {
+			route, routingErr := newModelRoutingRequest(c, policy)
+			if routingErr == nil {
+				defer route.close()
+				var selected bool
+				selected, routingErr = route.SelectNext(c, nil)
+				if routingErr == nil && !selected {
+					routingErr = modelRoutingError(c, http.StatusServiceUnavailable, i18n.MsgModelRoutingUnavailable)
+				}
+			}
+			if routingErr != nil {
+				abortWithOpenAiMessage(c, routingErr.StatusCode, routingErr.Error(), routingErr.GetErrorCode())
+				return
+			}
+			c.Set(modelRoutingContextKey, route)
+			common.SetContextKey(c, constant.ContextKeyRequestStartTime, time.Now())
+			c.Next()
+			if service.RequestPolicy(c).Successful {
+				service.RecordChannelAffinity(c, common.GetContextKeyInt(c, constant.ContextKeyChannelId))
+			}
+			return
+		}
 		_, pinned, _ := constraints.ResolvedPin()
 		if !pinned {
 			// Select a channel for the user

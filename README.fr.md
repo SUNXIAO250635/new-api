@@ -152,6 +152,12 @@ Correctifs appliqués par-dessus l'amont, chacun avec un test de régression :
 - **Redemption Codes** — surface de gestion complète avec actions par lot et export
 - **System Settings → Basic Authentication** — les deux contrôles IP ci-dessus
 
+### 10. Routage des modèles
+
+Dans **Routage des modèles**, un super-administrateur peut activer le modèle virtuel `auto` et ordonner les règles selon la présence d’images ou d’outils déclarés. La première règle applicable fournit le modèle principal et ses modèles de secours. La règle par défaut reste en dernier. Pour chaque modèle, indiquez les interfaces et les capacités prises en charge.
+
+Envoyez `model: "auto"` à `/v1/chat/completions` ou `/v1/responses`. Les noms de modèles explicites et les groupes Auto ne changent pas. La clé API et ses groupes doivent autoriser le modèle, dont le tarif doit être configuré. Le basculement suit la politique de réessai existante ; il s’arrête dès que l’amont accepte la requête ou que le client reçoit une réponse. Le journal d’utilisation indique l’alias demandé et le modèle facturé. Pour une requête Responses avec état ou en arrière-plan, indiquez un modèle précis.
+
 ---
 
 <a id="quick-start"></a>

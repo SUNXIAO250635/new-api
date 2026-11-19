@@ -4,6 +4,8 @@ import (
 	"go/ast"
 	"go/parser"
 	"go/token"
+	"net/http"
+	"net/http/httptest"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -11,11 +13,14 @@ import (
 
 	"github.com/QuantumNous/new-api/common"
 	"github.com/QuantumNous/new-api/middleware"
+	"github.com/QuantumNous/new-api/model"
 	"github.com/QuantumNous/new-api/service"
 	"github.com/QuantumNous/new-api/service/authz"
 	"github.com/gin-gonic/gin"
+	"github.com/glebarez/sqlite"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"gorm.io/gorm"
 )
 
 // accessTokenExemptRoutes are /api routes that never reach dashboard
@@ -198,5 +203,91 @@ func TestAccessTokenVerificationScopesAreAllListed(t *testing.T) {
 	for _, scope := range scopes {
 		_, listed := service.AccessTokenVerificationScope(scope)
 		assert.True(t, listed, "verification scope %s has no access token rule", scope)
+	}
+}
+
+func TestModelRoutingAdminAccess(t *testing.T) {
+	const path = "/api/model_routing"
+	const valid = `{"enabled":false,"revision":0,"rules":[]}`
+	db, err := gorm.Open(sqlite.Open(":memory:"), &gorm.Config{})
+	require.NoError(t, err)
+	sqlDB, err := db.DB()
+	require.NoError(t, err)
+	sqlDB.SetMaxOpenConns(1)
+	require.NoError(t, db.AutoMigrate(&model.User{}, &model.UserSession{}, &model.UserAccessToken{}, &model.Option{}, &model.AuditLog{}))
+	previousDB, previousLogDB := model.DB, model.LOG_DB
+	previousRedis, previousSecret := common.RedisEnabled, common.SessionSecret
+	previousTypes, previousLogType := common.MainDatabaseType(), common.LogDatabaseType()
+	model.DB, model.LOG_DB = db, db
+	common.RedisEnabled, common.SessionSecret = false, "model-routing-admin-test-secret"
+	common.SetDatabaseTypes(common.DatabaseTypeSQLite, common.DatabaseTypeSQLite)
+	t.Cleanup(func() {
+		model.DB, model.LOG_DB = previousDB, previousLogDB
+		common.RedisEnabled, common.SessionSecret = previousRedis, previousSecret
+		common.SetDatabaseTypes(previousTypes, previousLogType)
+		assert.NoError(t, sqlDB.Close())
+	})
+	admin := model.User{Username: "routing-admin", Role: common.RoleAdminUser, Status: common.UserStatusEnabled, Group: "default", AuthVersion: 1, AffCode: "rtadmin"}
+	root := model.User{Username: "routing-root", Role: common.RoleRootUser, Status: common.UserStatusEnabled, Group: "default", AuthVersion: 1, AffCode: "rtroot"}
+	require.NoError(t, db.Create(&admin).Error)
+	require.NoError(t, db.Create(&root).Error)
+	adminSession, err := service.CreateLoginSession(admin.Id, "password", "127.0.0.1", "")
+	require.NoError(t, err)
+	rootSession, err := service.CreateLoginSession(root.Id, "password", "127.0.0.1", "")
+	require.NoError(t, err)
+	suffix, err := common.GenerateRandomCharsKey(43)
+	require.NoError(t, err)
+	pat := model.AccessTokenPrefix + suffix
+	token := &model.UserAccessToken{Name: "routing token", TokenHash: model.AccessTokenFingerprint(pat), TokenHint: model.AccessTokenHint(pat)}
+	require.NoError(t, token.SetScopes([]string{"option:read", "option:write"}))
+	require.NoError(t, model.CreateUserAccessToken(root.Id, token, service.AccessTokenMaxPerUser))
+	gin.SetMode(gin.TestMode)
+	engine := gin.New()
+	SetApiRouter(engine)
+	for _, tc := range []struct {
+		name, method, bearer, body string
+		cookie                     bool
+		status                     int
+	}{
+		{name: "anonymous read", method: http.MethodGet, status: http.StatusUnauthorized},
+		{name: "anonymous write", method: http.MethodPut, body: valid, status: http.StatusUnauthorized},
+		{name: "admin read", method: http.MethodGet, bearer: adminSession.AccessToken, status: http.StatusForbidden},
+		{name: "admin write", method: http.MethodPut, bearer: adminSession.AccessToken, body: valid, status: http.StatusForbidden},
+		{name: "root PAT read", method: http.MethodGet, bearer: pat, status: http.StatusForbidden},
+		{name: "root PAT write", method: http.MethodPut, bearer: pat, body: valid, status: http.StatusForbidden},
+		{name: "cross-origin cookie-only write", method: http.MethodPut, body: valid, cookie: true, status: http.StatusUnauthorized},
+		{name: "root read", method: http.MethodGet, bearer: rootSession.AccessToken, status: http.StatusOK},
+		{name: "root malformed JSON", method: http.MethodPut, bearer: rootSession.AccessToken, body: valid + `{"ignored":true}`, status: http.StatusBadRequest},
+		{name: "root invalid rules", method: http.MethodPut, bearer: rootSession.AccessToken, body: `{"enabled":true,"revision":0,"rules":[],"audit_marker":"must-not-be-audited"}`, status: http.StatusBadRequest},
+		{name: "root stale revision", method: http.MethodPut, bearer: rootSession.AccessToken, body: `{"enabled":false,"revision":9,"rules":[]}`, status: http.StatusConflict},
+	} {
+		t.Run(tc.name, func(t *testing.T) {
+			request := httptest.NewRequest(tc.method, path, strings.NewReader(tc.body))
+			request.Header.Set("Content-Type", "application/json")
+			if tc.bearer != "" {
+				request.Header.Set("Authorization", "Bearer "+tc.bearer)
+			}
+			if tc.cookie {
+				request.Header.Set("Origin", "https://other.example")
+				request.AddCookie(&http.Cookie{Name: service.RefreshCookieName, Value: rootSession.RefreshToken})
+			}
+			response := httptest.NewRecorder()
+			engine.ServeHTTP(response, request)
+			require.Equal(t, tc.status, response.Code, response.Body.String())
+			if tc.status == http.StatusOK {
+				assert.Contains(t, response.Body.String(), `"rules":[]`)
+			}
+		})
+	}
+	var entries []model.AuditLog
+	require.NoError(t, db.Where("route = ? AND category = ?", path, model.AuditCategoryOperation).Find(&entries).Error)
+	require.Len(t, entries, 3)
+	for _, entry := range entries {
+		assert.Equal(t, root.Id, entry.UserId)
+		assert.False(t, entry.Success)
+		encoded, err := common.Marshal(entry)
+		require.NoError(t, err)
+		assert.NotContains(t, string(encoded), "must-not-be-audited")
+		assert.NotContains(t, string(encoded), rootSession.AccessToken)
 	}
 }

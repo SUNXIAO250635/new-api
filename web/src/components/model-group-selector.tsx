@@ -89,6 +89,8 @@ interface ModelSelectorProps {
   onModelChange: (value: string) => void
   className?: string
   disabled?: boolean
+  label?: string
+  showLabelOnMobile?: boolean
 }
 
 interface GroupSelectorProps {
@@ -105,33 +107,58 @@ const ModelTriggerButton = React.forwardRef<
     currentLabel: string
     triggerClassName?: string
     isDisabled?: boolean
+    showLabelOnMobile?: boolean
   }
->(({ currentLabel, triggerClassName, isDisabled, ...props }, ref) => (
-  <Button
-    ref={ref}
-    variant='outline'
-    role='combobox'
-    size='sm'
-    disabled={isDisabled}
-    className={cn(
-      'flex h-8 items-center gap-2 border px-3 font-medium',
-      'justify-center p-0 sm:w-auto sm:justify-start sm:px-3',
-      'w-8',
-      'bg-background text-foreground',
-      'hover:bg-accent transition-colors',
-      'focus:!ring-0 focus:!outline-none',
-      'shadow-none',
-      triggerClassName
-    )}
-    {...props}
-  >
-    <CpuIcon className='text-muted-foreground block size-4 sm:hidden' />
-    <span className='text-muted-foreground sm:text-foreground hidden truncate text-xs sm:block'>
-      {currentLabel}
-    </span>
-    <ChevronsUpDown className='text-muted-foreground hidden h-4 w-4 opacity-50 sm:block' />
-  </Button>
-))
+>(
+  (
+    { currentLabel, triggerClassName, isDisabled, showLabelOnMobile, ...props },
+    ref
+  ) => (
+    <Button
+      ref={ref}
+      type='button'
+      variant='outline'
+      role='combobox'
+      size='sm'
+      disabled={isDisabled}
+      className={cn(
+        'flex h-8 items-center gap-2 border px-3 font-medium',
+        showLabelOnMobile
+          ? 'w-auto justify-start px-3'
+          : 'w-8 justify-center p-0 sm:w-auto sm:justify-start sm:px-3',
+        'bg-background text-foreground',
+        'hover:bg-accent transition-colors',
+        !showLabelOnMobile && 'focus:!ring-0 focus:!outline-none',
+        'shadow-none',
+        triggerClassName
+      )}
+      {...props}
+    >
+      {!showLabelOnMobile && (
+        <CpuIcon
+          aria-hidden='true'
+          className='text-muted-foreground block size-4 sm:hidden'
+        />
+      )}
+      <span
+        className={cn(
+          'min-w-0 truncate text-xs',
+          !showLabelOnMobile &&
+            'text-muted-foreground sm:text-foreground hidden sm:block'
+        )}
+      >
+        {currentLabel}
+      </span>
+      <ChevronsUpDown
+        aria-hidden='true'
+        className={cn(
+          'text-muted-foreground size-4 shrink-0 opacity-50',
+          !showLabelOnMobile && 'hidden sm:block'
+        )}
+      />
+    </Button>
+  )
+)
 
 ModelTriggerButton.displayName = 'ModelTriggerButton'
 
@@ -176,7 +203,15 @@ GroupTriggerButton.displayName = 'GroupTriggerButton'
  * Styled following Scira's form-component design patterns
  */
 export const ModelSelector: React.FC<ModelSelectorProps> = React.memo(
-  ({ selectedModel, models, onModelChange, className, disabled = false }) => {
+  ({
+    selectedModel,
+    models,
+    onModelChange,
+    className,
+    disabled = false,
+    label,
+    showLabelOnMobile,
+  }) => {
     const { t } = useTranslation()
     const [open, setOpen] = useState(false)
     const [searchQuery, setSearchQuery] = useState('')
@@ -188,21 +223,19 @@ export const ModelSelector: React.FC<ModelSelectorProps> = React.memo(
     )
 
     // Group models by category
-    const groupedModels = useMemo(
-      () =>
-        models.reduce(
-          (acc, model) => {
-            const category = model.category || t('Other')
-            if (!acc[category]) {
-              acc[category] = []
-            }
-            acc[category].push(model)
-            return acc
-          },
-          {} as Record<string, ModelOption[]>
-        ),
-      [models, t]
-    )
+    const groupedModels = useMemo<Record<string, ModelOption[]>>(() => {
+      if (!open) return {}
+      const other = t('Other')
+      return models.reduce(
+        (groups, model) => {
+          const category = model.category || other
+          if (!groups[category]) groups[category] = []
+          groups[category].push(model)
+          return groups
+        },
+        {} as Record<string, ModelOption[]>
+      )
+    }, [models, open, t])
 
     // Filter models by search query
     const filteredModels = useMemo(() => {
@@ -321,7 +354,9 @@ export const ModelSelector: React.FC<ModelSelectorProps> = React.memo(
       <Drawer open={open} onOpenChange={setOpen}>
         <DrawerTrigger asChild>
           <ModelTriggerButton
-            currentLabel={currentModel?.label || t('Model')}
+            currentLabel={currentModel?.label || label || t('Model')}
+            aria-label={label}
+            showLabelOnMobile={showLabelOnMobile}
             triggerClassName={className}
             isDisabled={disabled}
             aria-expanded={open}
@@ -334,7 +369,7 @@ export const ModelSelector: React.FC<ModelSelectorProps> = React.memo(
             </DrawerTitle>
           </DrawerHeader>
           <div className='flex min-h-0 flex-1 flex-col'>
-            {renderModelCommandContent()}
+            {open && renderModelCommandContent()}
           </div>
         </DrawerContent>
       </Drawer>
@@ -343,7 +378,9 @@ export const ModelSelector: React.FC<ModelSelectorProps> = React.memo(
         <PopoverTrigger
           render={
             <ModelTriggerButton
-              currentLabel={currentModel?.label || t('Model')}
+              currentLabel={currentModel?.label || label || t('Model')}
+              aria-label={label}
+              showLabelOnMobile={showLabelOnMobile}
               triggerClassName={className}
               isDisabled={disabled}
               aria-expanded={open}
@@ -357,7 +394,7 @@ export const ModelSelector: React.FC<ModelSelectorProps> = React.memo(
           sideOffset={4}
           collisionPadding={8}
         >
-          {renderModelCommandContent()}
+          {open && renderModelCommandContent()}
         </PopoverContent>
       </Popover>
     )

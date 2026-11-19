@@ -526,6 +526,19 @@ func RouteTaskPluginEndpoint() gin.HandlerFunc {
 			pinEndpoint(c)
 			return
 		}
+		if request.Model == model.ModelRoutingAlias && c.Request.URL.Path == "/v1/responses" {
+			policy, routingErr := enabledModelRouting(c, request.Model)
+			if routingErr != nil {
+				abortWithOpenAiMessage(c, routingErr.StatusCode, routingErr.Error(), routingErr.GetErrorCode())
+				return
+			}
+			c.Set(modelRoutingPolicyContextKey, policy)
+			if policy != nil {
+				c.Set(contextKeyTaskPluginEndpointModel, *request)
+				c.Next()
+				return
+			}
+		}
 		endpoint, found := lookupTaskPluginEndpoint(generation, c.Request.Method, c.Request.URL.Path, request.Model)
 		if !found {
 			c.Set(contextKeyTaskPluginEndpointModel, *request)

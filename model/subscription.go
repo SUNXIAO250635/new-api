@@ -939,6 +939,16 @@ func HasActiveUserSubscriptionForGroup(userId int, usageGroup string) (bool, err
 	return count > 0, nil
 }
 
+// SubscriptionFundsRoutingGroup checks whether an existing reservation's
+// subscription may fund a different routing group.
+func SubscriptionFundsRoutingGroup(subscriptionID, userID int, group string) (bool, error) {
+	var count int64
+	err := applySubscriptionUsageGroupFilter(DB.Model(&UserSubscription{}).
+		Where("id = ? AND user_id = ? AND status = ? AND end_time > ?", subscriptionID, userID, "active", common.GetTimestamp()), group).
+		Count(&count).Error
+	return count > 0, err
+}
+
 // UserActiveSubscriptionsAllowWalletOverflow returns whether wallet balance may be used
 // after the user's subscription quota is exhausted. A single active subscription that
 // disallows wallet overflow (allow_wallet_overflow = false) blocks the fallback.

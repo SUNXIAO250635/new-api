@@ -202,6 +202,28 @@ describe('audit log sidebar entry', () => {
   })
 })
 
+it('defaults Model Routing to visible for the super administrator and lets sidebar settings hide it independently', () => {
+  const settings = parseSidebarModulesAdmin('{"admin":{"enabled":true}}')
+  expect(settings.admin.model_routing).toBe(true)
+
+  const { result, unmount } = sidebarFor(settings)
+  const entries = result.current.flatMap((group) => group.items)
+  expect(entries.find((item) => item.title === 'Model Routing')).toMatchObject({
+    url: '/model-routing',
+    requiredRole: ROLE.SUPER_ADMIN,
+  })
+  unmount()
+
+  settings.admin.model_routing = false
+  const saved = parseSidebarModulesAdmin(serializeSidebarModulesAdmin(settings))
+  const { result: hiddenResult } = sidebarFor(saved)
+  const visible = hiddenResult.current
+    .flatMap((group) => group.items)
+    .map((item) => item.title)
+  expect(visible).not.toContain('Model Routing')
+  expect(visible).toContain('Request processing')
+})
+
 describe('model pricing badge', () => {
   function issue(modelName: string, pluginKey: string): ModelPricingIssue {
     return {

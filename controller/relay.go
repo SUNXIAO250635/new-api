@@ -6,6 +6,7 @@ import (
 	"io"
 	"log"
 	"net/http"
+	"slices"
 	"strings"
 	"time"
 
@@ -93,6 +94,12 @@ func Relay(c *gin.Context, relayFormat types.RelayFormat) {
 
 	var relayInfo *relaycommon.RelayInfo
 	var ingressRecord []relaycommon.RequestPluginRecord
+	modelRoute := middleware.CurrentModelRoutingRequest(c)
+	originalWriter := c.Writer
+	var originalHeader http.Header
+	if modelRoute != nil {
+		originalHeader = originalWriter.Header().Clone()
+	}
 	// Registered first so that it runs last: the request plugins' report
 	// hooks receive the request once the client has the whole response and
 	// the request has settled.
@@ -109,6 +116,9 @@ func Relay(c *gin.Context, relayFormat types.RelayFormat) {
 			if relayFormat != types.RelayFormatOpenAIRealtime && c.Writer.Written() &&
 				strings.HasPrefix(c.Writer.Header().Get("Content-Type"), "text/event-stream") {
 				writeRelayStreamError(c, relayFormat, newAPIError)
+				return
+			}
+			if modelRoute != nil && c.Writer.Written() {
 				return
 			}
 			if relayFormat != types.RelayFormatOpenAIRealtime {
@@ -130,38 +140,10 @@ func Relay(c *gin.Context, relayFormat types.RelayFormat) {
 		}
 	}()
 
-	// Ingress takes the request plugin plan and may patch the stored body
-	// before it is parsed. A Realtime session runs its instances on its
-	// events instead.
-	var ingressSteps []relaycommon.RequestPluginStep
-	if relayFormat == types.RelayFormatOpenAIRealtime {
-		requestplugin.StartRealtime(c)
-	} else if ingressSteps, ingressRecord, newAPIError = requestplugin.Ingress(c, relayFormat); newAPIError != nil {
-		// The request reached no channel; its error log shows what the
-		// plugins did.
-		ingress := &relaycommon.RelayInfo{}
-		ingress.SetRequestPluginIngress(ingressSteps, ingressRecord)
-		service.RecordRelayErrorLog(c, 0, newAPIError, ingress)
+	relayInfo, ingressRecord, newAPIError = prepareRelayInput(c, relayFormat, ws, modelRoute)
+	if newAPIError != nil {
 		return
 	}
-
-	request, err := helper.GetAndValidateRequest(c, relayFormat)
-	if err != nil {
-		// Map "request body too large" to 413 so clients can handle it correctly
-		if common.IsRequestBodyTooLargeError(err) || errors.Is(err, common.ErrRequestBodyTooLarge) {
-			newAPIError = types.NewErrorWithStatusCode(err, types.ErrorCodeReadRequestBodyFailed, http.StatusRequestEntityTooLarge, types.ErrOptionWithSkipRetry())
-		} else {
-			newAPIError = types.NewError(err, types.ErrorCodeInvalidRequest, types.ErrOptionWithStatusCode(http.StatusBadRequest), types.ErrOptionWithSkipRetry())
-		}
-		return
-	}
-
-	relayInfo, err = relaycommon.GenRelayInfo(c, relayFormat, request, ws)
-	if err != nil {
-		newAPIError = types.NewError(err, types.ErrorCodeGenRelayInfoFailed)
-		return
-	}
-	relayInfo.SetRequestPluginIngress(ingressSteps, ingressRecord)
 
 	defer func() {
 		recovered := recover()
@@ -183,12 +165,16 @@ func Relay(c *gin.Context, relayFormat types.RelayFormat) {
 		defer stopKeepAlive()
 	}
 
-	if newAPIError = relay.PrepareRequestBilling(c, relayInfo); newAPIError != nil {
+	newAPIError = relay.PrepareRequestBilling(c, relayInfo)
+	if newAPIError != nil && modelRoute == nil {
 		return
 	}
 	defer func() {
 		newAPIError = relay.RefundFailedRequestBilling(c, relayInfo, newAPIError)
 	}()
+	if newAPIError != nil {
+		return
+	}
 
 	retryParam := &service.RetryParam{
 		Ctx:         c,
@@ -228,6 +214,10 @@ func Relay(c *gin.Context, relayFormat types.RelayFormat) {
 			break
 		}
 		c.Request.Body = io.NopCloser(bodyStorage)
+		if modelRoute != nil && c.Request.Context().Err() != nil {
+			newAPIError = types.NewErrorWithStatusCode(c.Request.Context().Err(), types.ErrorCodeInvalidRequest, http.StatusRequestTimeout, types.ErrOptionWithSkipRetry())
+			break
+		}
 
 		// The request plugins' reply checks read the answer this attempt
 		// writes; without a reply instance nothing changes.
@@ -254,11 +244,50 @@ func Relay(c *gin.Context, relayFormat types.RelayFormat) {
 		relayInfo.LastError = newAPIError
 
 		decision := service.DecideRelayRetry(c, newAPIError, common.RetryTimes-retryParam.GetRetry())
+		if modelRoute != nil && decision.Action == "retry" {
+			decision = modelFallbackDecision(c, relayInfo, newAPIError, common.RetryTimes-retryParam.GetRetry())
+		}
 		service.RecordPolicyFailure(c, channel.Id, newAPIError, decision)
 		processChannelError(c, *types.NewChannelError(channel.Id, channel.Type, channel.Name, channel.ChannelInfo.IsMultiKey, common.GetContextKeyString(c, constant.ContextKeyChannelKey), channel.GetAutoBan()), newAPIError, relayInfo)
 
 		if decision.Action != "retry" {
 			break
+		}
+		if modelRoute != nil {
+			session, _ := relayInfo.Billing.(*service.BillingSession)
+			var eligibleGroup func(string) (bool, error)
+			if session != nil {
+				eligibleGroup = session.AllowsModelRoutingGroup
+			}
+			selected, routeErr := modelRoute.SelectNext(c, eligibleGroup)
+			if routeErr != nil {
+				newAPIError = routeErr
+				break
+			}
+			if !selected {
+				break
+			}
+			c.Writer = originalWriter
+			header := c.Writer.Header()
+			clear(header)
+			for key, values := range originalHeader {
+				header[key] = slices.Clone(values)
+			}
+			next, nextIngress, prepareErr := prepareRelayInput(c, relayFormat, nil, modelRoute)
+			ingressRecord = nextIngress
+			if prepareErr != nil {
+				newAPIError = prepareErr
+				break
+			}
+			next.RequestId = relayInfo.RequestId
+			if session != nil {
+				session.RebindModelRouting(next)
+			}
+			relayInfo = next
+			retryParam.ModelName = next.OriginModelName
+			if newAPIError = relay.PrepareRequestBilling(c, relayInfo); newAPIError != nil {
+				break
+			}
 		}
 	}
 

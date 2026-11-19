@@ -101,6 +101,9 @@ func OaiResponsesStreamHandler(c *gin.Context, info *relaycommon.RelayInfo, resp
 
 	common.SetContextKey(c, constant.ContextKeyResponseStreamStatus, info.StreamStatus)
 	info.StreamStatus.RequireTerminal()
+	if info.RequestedModelName != "" && (!info.HasSendResponse() || !c.Writer.Written()) {
+		return nil, types.NewOpenAIError(fmt.Errorf("upstream Responses stream produced no output"), types.ErrorCodeEmptyResponse, http.StatusBadGateway, types.ErrOptionWithSkipRetry())
+	}
 	return accumulator.Finish(), nil
 }
 

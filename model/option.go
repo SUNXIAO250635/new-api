@@ -215,6 +215,15 @@ func LoadOptionsFromDatabase() error {
 	}()
 	passkeyOptions := make(map[string]string)
 	for _, option := range options {
+		if option.Key == modelRoutingOptionKey {
+			policy, err := parseModelRouting(option.Value)
+			if err != nil {
+				common.SysLog(common.LogText("failed to load model routing policy: %s", err.Error()))
+			} else {
+				publishModelRouting(policy)
+			}
+			continue
+		}
 		if IsPasskeyDomainOption(option.Key) {
 			passkeyOptions[option.Key] = option.Value
 			continue
@@ -239,6 +248,9 @@ func SyncOptions(frequency int) {
 }
 
 func validateOptionValue(key string, value string) error {
+	if err := validateModelRoutingOptionKey(key); err != nil {
+		return err
+	}
 	if key == legacyAccessTokenRetireAtKey {
 		return errLegacyRetireAtReadOnly
 	}

@@ -269,6 +269,33 @@ func (s *BillingSession) GetPreConsumedQuota() int {
 	return s.preConsumedQuota
 }
 
+// AllowsModelRoutingGroup checks the entitlement of the existing reservation,
+// not whether a different subscription could pay for the second model.
+func (s *BillingSession) AllowsModelRoutingGroup(group string) (bool, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	if s.settled || s.refunded || s.tokenSettlementPending {
+		return false, nil
+	}
+	subscription, ok := s.funding.(*SubscriptionFunding)
+	if !ok {
+		return true, nil
+	}
+	return model.SubscriptionFundsRoutingGroup(subscription.subscriptionId, subscription.userId, group)
+}
+
+// RebindModelRouting keeps the single reservation and its refund identity
+// while refreshing request/price state for the next concrete model.
+func (s *BillingSession) RebindModelRouting(info *relaycommon.RelayInfo) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
+	info.UserQuota = s.relayInfo.UserQuota
+	info.RequestId = s.relayInfo.RequestId
+	s.relayInfo = info
+	info.Billing = s
+	s.syncRelayInfo()
+}
+
 func (s *BillingSession) GetCommittedQuotas() (fundingQuota int, tokenQuota int) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
@@ -314,7 +341,14 @@ func (s *BillingSession) reserve(targetQuota int, requireAvailableQuota bool) er
 		return err
 	}
 	if err := s.reserveToken(delta); err != nil {
-		s.rollbackFundingReserve(delta)
+		if rollbackErr := s.rollbackFundingReserve(delta); rollbackErr != nil {
+			// The funding debit committed, even though the token debit did not.
+			// The outer refund must compensate it together with any prior reservation.
+			s.fundingConsumed += delta
+			s.extraReserved += delta
+			s.syncRelayInfo()
+			return types.NewError(errors.Join(err, rollbackErr), types.ErrorCodeUpdateDataError, types.ErrOptionWithSkipRetry())
+		}
 		return err
 	}
 
@@ -471,31 +505,29 @@ func (s *BillingSession) reserveFunding(delta int, requireAvailableQuota bool) e
 	}
 }
 
-func (s *BillingSession) rollbackFundingReserve(delta int) {
+func (s *BillingSession) rollbackFundingReserve(delta int) error {
 	switch funding := s.funding.(type) {
 	case *WalletFunding:
 		if err := model.IncreaseUserQuota(funding.userId, delta, false); err != nil {
-			common.SysLog(common.LogText("error rolling back wallet funding reserve: %s", err.Error()))
-		} else {
-			funding.consumed -= delta
+			return fmt.Errorf("roll back wallet funding reserve: %w", err)
 		}
+		funding.consumed -= delta
 	case *WelfareFunding:
 		applied, err := model.IncreaseUserWelfareQuotaForVersion(funding.userId, delta, funding.version)
-		if err != nil || !applied {
-			if err == nil {
-				err = model.ErrWelfareQuotaNotApplied
-			}
-			common.SysLog("error rolling back welfare funding reserve: " + err.Error())
-		} else {
-			funding.consumed -= delta
+		if err != nil {
+			return fmt.Errorf("roll back welfare funding reserve: %w", err)
 		}
+		if !applied {
+			return model.ErrWelfareQuotaNotApplied
+		}
+		funding.consumed -= delta
 	case *SubscriptionFunding:
 		if err := model.PostConsumeUserSubscriptionForRequest(funding.requestId, funding.subscriptionId, -int64(delta)); err != nil {
-			common.SysLog(common.LogText("error rolling back subscription funding reserve: %s", err.Error()))
-		} else {
-			funding.postConsumed -= int64(delta)
+			return fmt.Errorf("roll back subscription funding reserve: %w", err)
 		}
+		funding.postConsumed -= int64(delta)
 	}
+	return nil
 }
 
 func (s *BillingSession) reserveToken(delta int) error {

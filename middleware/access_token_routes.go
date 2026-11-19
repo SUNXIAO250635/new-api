@@ -164,6 +164,10 @@ var accessTokenRouteRules = map[string]accessTokenRouteRule{
 	"POST /api/option/waffo-pancake/subscription-product":        accessTokenScopeRule("option:write"),
 	"GET /api/option/waffo-pancake/subscription-product-options": accessTokenScopeRule("option:read"),
 
+	// router/api-router.go: /api/model_routing
+	"GET /api/model_routing": accessTokenSessionRule,
+	"PUT /api/model_routing": accessTokenSessionRule,
+
 	// router/api-router.go: /api/custom-oauth-provider, /api/ratio_sync
 	"POST /api/custom-oauth-provider/discovery": accessTokenScopeRule("option:write"),
 	"GET /api/custom-oauth-provider/":           accessTokenScopeRule("option:read"),

@@ -9,6 +9,7 @@ import (
 
 	"github.com/QuantumNous/new-api/common"
 	"github.com/QuantumNous/new-api/constant"
+	"github.com/QuantumNous/new-api/middleware"
 	"github.com/QuantumNous/new-api/model"
 	"github.com/QuantumNous/new-api/pkg/jsplugin"
 	"github.com/QuantumNous/new-api/relay"
@@ -322,6 +323,9 @@ func ListModels(c *gin.Context, modelType int) {
 			"nextPageToken": nil,
 		})
 	default:
+		if middleware.ModelRoutingDiscoverable(c, userModelNames, ownerGroups) {
+			userOpenAiModels = append(userOpenAiModels, dto.OpenAIModels{Id: model.ModelRoutingAlias, Object: "model"})
+		}
 		c.JSON(200, gin.H{
 			"success": true,
 			"data":    userOpenAiModels,

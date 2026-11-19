@@ -152,6 +152,12 @@ Fixes applied on top of upstream, each with a regression test:
 - **Redemption Codes** — full management surface with bulk actions and export
 - **System Settings → Basic Authentication** — the two IP controls above
 
+### 10. Model routing
+
+In **Model Routing**, a super administrator can enable the virtual model `auto` and order rules by image input and tool declarations. The first matching rule supplies the primary and fallback models; keep a default rule last. Each candidate declares the endpoints and capabilities it supports.
+
+Send `model: "auto"` to `/v1/chat/completions` or `/v1/responses`. Explicit model names and Auto groups are unchanged. Candidates must be allowed by the API key and its groups and have configured pricing. Failover uses the existing retry policy and stops once the upstream accepts the request or the client receives output. Usage logs record the requested alias and the concrete model used for billing. For a stateful or background Responses request, select a concrete model.
+
 ---
 
 <a id="quick-start"></a>

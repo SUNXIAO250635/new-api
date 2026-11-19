@@ -35,6 +35,12 @@ const (
 	MsgDistributorNoAvailableChannelTaskPlugin = "distributor.no_available_channel_task_plugin"
 	MsgDistributorInvalidParseModel            = "distributor.invalid_request_parse_model"
 
+	MsgModelRoutingInvalidBody = "relay.model_routing_invalid_body"
+	MsgModelRoutingPinned      = "relay.model_routing_pinned"
+	MsgModelRoutingForbidden   = "relay.model_routing_forbidden"
+	MsgModelRoutingUnavailable = "relay.model_routing_unavailable"
+	MsgModelRoutingStateful    = "relay.model_routing_stateful"
+
 	MsgQuotaUserInsufficient             = "quota.user_insufficient"
 	MsgQuotaPreConsumeInsufficient       = "quota.pre_consume_insufficient"
 	MsgQuotaSubscriptionInsufficient     = "quota.subscription_insufficient"
